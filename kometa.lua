@@ -790,14 +790,17 @@ misco:Cheat("Dropdown", "Generate Amulet", function(Option) local A_1 = Option..
 misco:Cheat("Button", "Export Stats Table", function() local StatCache = require(game.ReplicatedStorage.ClientStatCache)writefile("Stats_"..api.nickname..".json", StatCache:Encode()) end, {text = ''})
 
 local extras = extrtab:Sector("Extras")
-extras:Cheat("Button", "Hide nickname", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/other/nicknamespoofer.lua"))()end, {text = ''})
-extras:Cheat("Button", "Boost FPS", function()loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/other/fpsboost.lua"))()end, {text = ''})
-extras:Cheat("Button", "Destroy Decals", function()loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/other/destroydecals.lua"))()end, {text = ''})
-extras:Cheat("Checkbox", "Disable 3D Render On Unfocus", function(State), kometa.toggles.disablerender = State end)
 extras:Cheat("Textbox", "Glider Speed", function(Value) local StatCache = require(game.ReplicatedStorage.ClientStatCache) local stats = StatCache:Get() stats.EquippedParachute = "Glider" local module = require(game:GetService("ReplicatedStorage").Parachutes) local st = module.GetStat local glidersTable = getupvalues(st) glidersTable[1]["Glider"].Speed = Value setupvalue(st, st[1]'Glider', glidersTable) end)
 extras:Cheat("Textbox", "Glider Float", function(Value) local StatCache = require(game.ReplicatedStorage.ClientStatCache) local stats = StatCache:Get() stats.EquippedParachute = "Glider" local module = require(game:GetService("ReplicatedStorage").Parachutes) local st = module.GetStat local glidersTable = getupvalues(st) glidersTable[1]["Glider"].Float = Value setupvalue(st, st[1]'Glider', glidersTable) end)
 extras:Cheat("Button", "Invisibility", function(State) api.teleport(CFrame.new(0,0,0)) wait(1) if game.Players.LocalPlayer.Character:FindFirstChild('LowerTorso') then Root = game.Players.LocalPlayer.Character.LowerTorso.Root:Clone() game.Players.LocalPlayer.Character.LowerTorso.Root:Destroy() Root.Parent = game.Players.LocalPlayer.Character.LowerTorso api.teleport(game:GetService("Players").LocalPlayer.SpawnPos.Value) end end, {text = ''})
 extras:Cheat("Checkbox", "Float", function(State) temptable.float = State end)
+
+local optimize = extrtab:Sector("Optimization")
+optimize:Cheat("Button", "Hide nickname", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/other/nicknamespoofer.lua"))()end, {text = ''})
+optimize:Cheat("Button", "Boost FPS", function()loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/other/fpsboost.lua"))()end, {text = ''})
+optimize:Cheat("Button", "Destroy Decals", function()loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/other/destroydecals.lua"))()end, {text = ''})
+optimize:Cheat("Checkbox", "Disable 3D Render On Unfocus", function(State) kometa.toggles.disablerender = State end)
+optimize:Cheat("Checkbox", "Disable 3D Render", function(State) game:GetService("RunService"):Set3dRenderingEnabled(not State) end)
 
 local farmsettings = setttab:Sector("Autofarm Settings")
 farmsettings:Cheat("Textbox", "Autofarming Walkspeed", function(Value) kometa.vars.farmspeed = Value end, {placeholder = "Default Value = 60"})
@@ -1077,7 +1080,7 @@ task.spawn(function() while task.wait() do
             if kometa.toggles.autoquest then makequests() end
             if kometa.toggles.autoplanters then collectplanters() end
             if kometa.toggles.autokillmobs then 
-                if temptable.act >= kometaa.vars.monstertimer then
+                if temptable.act >= kometa.vars.monstertimer then
                     temptable.started.monsters = true
                     temptable.act = 0
                     killmobs() 
@@ -1267,8 +1270,8 @@ end end)
 
 game:GetService('RunService').Heartbeat:connect(function() 
     if kometa.toggles.autoquest then firesignal(game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.NPC.ButtonOverlay.MouseButton1Click) end
-    if kometa.toggles.loopspeed then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = kometaa.vars.walkspeed end
-    if kometa.toggles.loopjump then game.Players.LocalPlayer.Character.Humanoid.JumpPower = kometaa.vars.jumppower end
+    if kometa.toggles.loopspeed then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = kometa.vars.walkspeed end
+    if kometa.toggles.loopjump then game.Players.LocalPlayer.Character.Humanoid.JumpPower = kometa.vars.jumppower end
 end)
 
 game:GetService('RunService').Heartbeat:connect(function()
