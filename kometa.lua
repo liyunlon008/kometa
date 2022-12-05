@@ -695,7 +695,7 @@ local setttab = ui:Category("Settings")
 
 local main = hometab:Sector("Main")
 main:Cheat("Label", "Thanks you for using our script, "..api.nickname)
-main:Cheat("Label", "Official fork of kometa by notweuz")
+main:Cheat("Label", "Official fork of kocmoc by notweuz")
 main:Cheat("Label", "Script by mrdevl and .anon")
 main:Cheat("Label", "Script version: "..temptable.version)
 main:Cheat("Label", "Place version: "..game.PlaceVersion)
