@@ -20,7 +20,7 @@ local hi = false
 -- Script tables
 
 local temptable = {
-    version = "0.1.1 inDev",
+    version = "1.0.0",
     blackfield = "Ant Field",
     redfields = {},
     bluefields = {},
