@@ -357,9 +357,6 @@ local kometa = {
                 thumbnail = {
                     url = image;
                 };
-                author = {
-                    name = game.Players.LocalPlayer.Name;
-                };
             };
     
             (syn and syn.request or http_request) {
