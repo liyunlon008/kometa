@@ -23,6 +23,7 @@ span {
 }
 
 .version_switch {
+    padding-top: 2px;
     text-align: center;
 }
 
