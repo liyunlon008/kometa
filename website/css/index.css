@@ -2,7 +2,6 @@
     font-family: "Trebuchet MS", serif;
     padding: 0;
     margin: 0;
-    text-decoration: none;
     color: black
 }
 
@@ -23,11 +22,16 @@ span {
     font-size: 20px;
 }
 
+.version_switch {
+    text-align: center;
+}
+
 button {
     padding: 10px;
     background: transparent;
     border-radius: 5%;
     border: 1px solid black;
+    text-decoration: none;
 }
 
 .buttons {
