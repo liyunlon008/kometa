@@ -59,38 +59,38 @@ kometa.theme = { -- light
 }
 
 kometa.dark_theme = { -- dark
-	main_container = Color3.fromRGB(32, 32, 33),
-	separator_color = Color3.fromRGB(63, 63, 65),
+	main_container = Color3.fromRGB(23, 23, 23),
+	separator_color = Color3.fromRGB(72, 72, 72),
 
 	text_color = Color3.fromRGB(206, 206, 206),
 
 	category_button_background = Color3.fromRGB(63, 62, 65),
 	category_button_border = Color3.fromRGB(72, 71, 74),
 
-	checkbox_checked = Color3.fromRGB(132, 255, 130),
-	checkbox_outer = Color3.fromRGB(84, 81, 86),
-	checkbox_inner = Color3.fromRGB(132, 132, 136),
+	checkbox_checked = Color3.fromRGB(164, 84, 255),
+	checkbox_outer = Color3.fromRGB(37, 34, 41),
+	checkbox_inner = Color3.fromRGB(37, 34, 41),
 
-	slider_color = Color3.fromRGB(177, 177, 177),
-	slider_color_sliding = Color3.fromRGB(132, 255, 130),
-	slider_background = Color3.fromRGB(88, 84, 90),
+	slider_color = Color3.fromRGB(164, 84, 255),
+	slider_color_sliding = Color3.fromRGB(255, 255, 255),
+	slider_background = Color3.fromRGB(37, 34, 41),
 	slider_text = Color3.fromRGB(177, 177, 177),
 
-	textbox_background = Color3.fromRGB(103, 103, 106),
-	textbox_background_hover = Color3.fromRGB(137, 137, 141),
+	textbox_background = Color3.fromRGB(164, 84, 255),
+	textbox_background_hover = Color3.fromRGB(76, 61, 100),
 	textbox_text = Color3.fromRGB(195, 195, 195),
 	textbox_text_hover = Color3.fromRGB(232, 232, 232),
 	textbox_placeholder = Color3.fromRGB(135, 135, 138),
 
-	dropdown_background = Color3.fromRGB(88, 88, 91),
+	dropdown_background = Color3.fromRGB(164, 84, 255),
 	dropdown_text = Color3.fromRGB(195, 195, 195),
-	dropdown_text_hover = Color3.fromRGB(232, 232, 232),
-	dropdown_scrollbar_color = Color3.fromRGB(118, 118, 121),
-	
-	button_background = Color3.fromRGB(103, 103, 106),
-	button_background_hover = Color3.fromRGB(137, 137, 141),
-	button_background_down = Color3.fromRGB(70, 70, 81),
-	
+	dropdown_text_hover = Color3.fromRGB(255,255,255),
+	dropdown_scrollbar_color = Color3.fromRGB(255,255,255),
+
+	button_background = Color3.fromRGB(164, 84, 255),
+	button_background_hover = Color3.fromRGB(76, 61, 100),
+	button_background_down = Color3.fromRGB(194, 141, 255),
+
 	scrollbar_color = Color3.fromRGB(118, 118, 121),
 }
 
