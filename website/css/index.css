@@ -1,0 +1,36 @@
+* {
+    font-family: "Trebuchet MS", serif;
+    padding: 0;
+    margin: 0;
+    text-decoration: none;
+    color: black
+}
+
+body {
+    padding: 250px 50px 50px;
+}
+
+.title {
+    text-align: center;
+}
+
+.terms {
+    padding-top: 50px;
+    padding-bottom: 100px;
+}
+
+span {
+    font-size: 20px;
+}
+
+button {
+    padding: 10px;
+    background: transparent;
+    border-radius: 5%;
+    border: 1px solid black;
+}
+
+.buttons {
+    padding: 50px;
+    text-align: center;
+}
