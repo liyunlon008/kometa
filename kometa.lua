@@ -137,7 +137,9 @@ local temptable = {
         local br = tonumber(amount)
 
         game:GetService("ReplicatedStorage").Events.ConstructHiveCellFromEgg:InvokeServer(bo, ba, be, br)
-    end
+    end,
+    findpopstar = false,
+    item_names = {}
 }
 local planterst = {
     plantername = {},
@@ -165,6 +167,7 @@ for _,v in next, game:GetService("Workspace").MonsterSpawners:GetChildren() do t
 local accesoriestable = {}
 for _,v in next, game:GetService("ReplicatedStorage").Accessories:GetChildren() do if v.Name ~= "UpdateMeter" then table.insert(accesoriestable, v.Name) end end
 for i,v in pairs(getupvalues(require(game:GetService("ReplicatedStorage").PlanterTypes).GetTypes)) do for e,z in pairs(v) do table.insert(temptable.allplanters, e) end end
+for v,_ in next, rtsg().Eggs do table.insert(temptable.item_names, v) end
 table.sort(fieldstable)
 table.sort(accesoriestable)
 table.sort(toystable)
@@ -189,6 +192,9 @@ cocopad.Anchored = true
 cocopad.Transparency = 1
 cocopad.Size = Vector3.new(10, 1, 10)
 cocopad.Position = Vector3.new(-307.52117919922, 105.91863250732, 467.86791992188)
+
+local popfolder = Instance.new("Folder", game:GetService("Workspace").Particles)
+popfolder.Name = "PopStars"
 
 -- antfarm
 
@@ -270,10 +276,13 @@ local kometa = {
         autoant = false,
         killwindy = false,
         godmode = false,
-        disablerender = false
+        disablerender = false,
+        bloatfarm = false,
+        autodonate = false
     },
     vars = {
         field = "Ant Field",
+        donatit = {"Treat", 1},
         convertat = 100,
         farmspeed = 60,
         prefer = "Tokens",
@@ -315,7 +324,8 @@ local defaultkometa = kometa
 -- functions
 
 function statsget() local StatCache = require(game.ReplicatedStorage.ClientStatCache) local stats = StatCache:Get() return stats end
-function farm(trying)
+function farm(trying, important)
+    if important and kometa.toggles.bloatfarm and temptable.foundpopstar then api.tween(0.1, trying.CFrame) end
     if kometa.toggles.loopfarmspeed then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = kometa.vars.farmspeed end
     api.humanoid():MoveTo(trying.Position) 
     repeat task.wait() until (trying.Position-api.humanoidrootpart().Position).magnitude <=4 or not IsToken(trying) or not temptable.running
@@ -364,6 +374,7 @@ function gettoken(v3)
         v3 = fieldposition
     end
     task.wait()
+    if kometa.toggles.bloatfarm and temptable.foundpopstar then return end
     for e,r in next, game:GetService("Workspace").Collectibles:GetChildren() do
         itb = false
         if r:FindFirstChildOfClass("Decal") and kometa.toggles.enabletokenblacklisting then
@@ -574,7 +585,7 @@ end
 function getbubble()
     for i,v in next, game.workspace.Particles:GetChildren() do
         if string.find(v.Name, "Bubble") and temptable.running == false and tonumber((v.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude/1.4 then
-            farm(v)
+            farm(v, true)
             break
         end
     end
@@ -732,6 +743,7 @@ farm:Cheat("Checkbox", "Autofarm", function(State) kometa.toggles.autofarm = not
 farm:Cheat("Checkbox", "Autodig", function(State) kometa.toggles.autodig = State end)
 farm:Cheat("Checkbox", "Auto Sprinkler", function(State) kometa.toggles.autosprinkler = State end)
 farm:Cheat("Checkbox", "Farm Bubbles", function(State) kometa.toggles.farmbubbles = State end)
+farm:Cheat("Checkbox", "Bubble Bloat Helper", function(State) kometa.toggles.bloatfarm = State end)
 farm:Cheat("Checkbox", "Farm Flames", function(State) kometa.toggles.farmflame = State end)
 farm:Cheat("Checkbox", "Farm Coconuts & Shower", function(State) kometa.toggles.farmcoco = State end)
 farm:Cheat("Checkbox", "Farm Precise Crosshairs", function(State) kometa.toggles.collectcrosshairs = State end)
@@ -839,6 +851,12 @@ optimize:Cheat("Button", "Boost FPS", function()loadstring(game:HttpGet("https:/
 optimize:Cheat("Button", "Destroy Decals", function()loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/other/destroydecals.lua"))()end, {text = ''})
 optimize:Cheat("Checkbox", "Disable 3D Render On Unfocus", function(State) kometa.toggles.disablerender = State end)
 optimize:Cheat("Checkbox", "Disable 3D Render", function(State) game:GetService("RunService"):Set3dRenderingEnabled(not State) end)
+
+local windsh = extrtab:Sector("Wind Shrine")
+windsh:Cheat("Dropdown", "Item", function(Option) kometa.vars.donatit[1] = Option end, {options=temptable.item_names}) 
+windsh:Cheat("Textbox", "Count", function(Value) kometa.vars.donatit[2] = tonumber(Value) end)
+windsh:Cheat("Checkbox", "Auto Donate", function(State) kometa.toggles.autodonate = State end)
+windsh:Cheat("Label", "") windsh:Cheat("Label", "") windsh:Cheat("Label", "") windsh:Cheat("Label", "") windsh:Cheat("Label", "") windsh:Cheat("Label", "")
 
 local farmsettings = setttab:Sector("Autofarm Settings")
 farmsettings:Cheat("Textbox", "Autofarming Walkspeed", function(Value) kometa.vars.farmspeed = Value end, {placeholder = "Default Value = 60"})
@@ -1242,6 +1260,15 @@ end)
 
 task.spawn(function() while task.wait(.1) do
     if not temptable.converting then
+        if kometa.toggles.autodonate then
+            game.ReplicatedStorage.Events.WindShrineDonation:InvokeServer(kometa.vars.donatit[1], kometa.vars.donatit[2])
+            game.ReplicatedStorage.Events.WindShrineTrigger:FireServer()
+            for i,v in pairs(game.Workspace.Collectibles:GetChildren()) do
+                if (v.Position-Vector3.new(-484, 142, 413)).magnitude < 35 and v.CFrame.YVector.Y == 1 then
+                    api.humanoidrootpart().CFrame = v.CFrame
+                end
+            end
+        end
         if kometa.toggles.autosamovar then
             game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Samovar")
             platformm = game:GetService("Workspace").Toys.Samovar.Platform
@@ -1369,6 +1396,19 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
             temptable.tokensfarm = true
         end
     end)
+end)
+
+game:GetService("Workspace").Particles:FindFirstChild('PopStars').ChildAdded:Connect(function(v)
+    task.wait(.1)
+    if (v.Position-api.humanoidrootpart().Position).magnitude < 15 then
+        temptable.foundpopstar = true
+    end
+end)
+
+game:GetService("Workspace").Particles:FindFirstChild('PopStars').ChildRemoved:Connect(function(v)
+    if (v.Position-api.humanoidrootpart().Position).magnitude < 15 then
+        temptable.foundpopstar = false
+    end
 end)
 
 for _,v in next, game.workspace.Collectibles:GetChildren() do
