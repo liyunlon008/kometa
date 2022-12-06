@@ -29,6 +29,7 @@ local temptable = {
     balloondetected = false,
     puffshroomdetected = false,
     magnitude = 70,
+    webhook = '',
     running = false,
     configname = "",
     tokenpath = game:GetService("Workspace").Collectibles,
@@ -114,7 +115,13 @@ local temptable = {
             end
         end
     end,
-    runningfor = 0,
+    stats = {
+        runningfor = 0,
+        killedvicious = 0,
+        killedwindy = 0;
+        farmedsprouts = 0,
+        farmedants = 0
+    },
     oldtool = rtsg()["EquippedCollector"],
     ['gacf'] = function(part, st)
         coordd = CFrame.new(part.Position.X, part.Position.Y+st, part.Position.Z)
@@ -206,12 +213,20 @@ local kometa = {
     blacklistedfields = {},
     killerkometa = {},
     bltokens = {},
+    webhooking = {
+        convert = false,
+        vicious = false,
+        windy = false,
+        playeradded = false,
+        connectionlost = false
+    },
     toggles = {
         autofarm = false,
         farmclosestleaf = false,
         farmbubbles = false,
         autodig = false,
         farmrares = false,
+        farmtickets = false,
         rgbui = false,
         farmflower = false,
         farmfuzzy = false,
@@ -479,6 +494,7 @@ function farmant()
     game.ReplicatedStorage.Events.ItemPackageEvent:InvokeServer("Equip",{["Mute"] = true,["Type"] = temptable.oldtool,["Category"] = "Collector"})
     temptable.started.ant = false
     antpart.CanCollide = false
+    temptable.stats.farmedants = temptable.stats.farmedants + 1
 end
 
 function collectplanters()
@@ -687,6 +703,7 @@ ui.ChangeToggleKey(Enum.KeyCode.Semicolon)
 local hometab = ui:Category("Home")
 local farmtab = ui:Category("Farming")
 local combtab = ui:Category("Combat")
+local statstab = ui:Category("Statistics")
 local wayptab = ui:Category("Waypoints")
 local hivetab = ui:Category("Hive")
 local misctab = ui:Category("Misc")
@@ -695,11 +712,10 @@ local setttab = ui:Category("Settings")
 
 local main = hometab:Sector("Main")
 main:Cheat("Label", "Thanks you for using our script, "..api.nickname)
-main:Cheat("Label", "Official fork of kocmoc by notweuz")
+main:Cheat("Label", "Another official fork of kocmoc by notweuz")
 main:Cheat("Label", "Script by mrdevl and .anon")
 main:Cheat("Label", "Script version: "..temptable.version)
 main:Cheat("Label", "Place version: "..game.PlaceVersion)
-local gainedhoneylabel = main:Cheat("Label", "Gained Honey: 0")
 --information:Cheat("Button", "Discord Invite", function() setclipboard("https://discord.gg/2a5gVpcpzv") end)
 --information:Cheat("Button", "Donation", function() setclipboard("https://qiwi.com/n/W33UZ") end)
 local signs = hometab:Sector("Signs")
@@ -730,7 +746,7 @@ farmingtwo:Cheat("Checkbox", "Auto Wealth Clock", function(State) kometa.toggles
 --farmingtwo:Cheat("Auto Gingerbread Bears", function(State) kometa.toggles.collectgingerbreads = State end)
 --farmingtwo:Cheat("Auto Samovar", function(State) kometa.toggles.autosamovar = State end)
 --farmingtwo:Cheat("Auto Stockings", function(State) kometa.toggles.autostockings = State end)
-farmingtwo:Cheat("Checkbox", "Auto Planters After Converting", function(State) kometa.toggles.autoplanters = State end)
+farmingtwo:Cheat("Checkbox", "Replace Planters After Converting", function(State) kometa.toggles.autoplanters = State end)
 --farmingtwo:Cheat("Auto Honey Candles", function(State) kometa.toggles.autocandles = State end)
 --farmingtwo:Cheat("Auto Beesmas Feast", function(State) kometa.toggles.autofeast = State end)
 --farmingtwo:Cheat("Auto Onett's Lid Art", function(State) kometa.toggles.autoonettart = State end)
@@ -738,6 +754,7 @@ farmingtwo:Cheat("Checkbox", "Auto Free Antpasses", function(State) kometa.toggl
 farmingtwo:Cheat("Checkbox", "Farm Sprouts", function(State) kometa.toggles.farmsprouts = State end)
 farmingtwo:Cheat("Checkbox", "Farm Puffshrooms", function(State) kometa.toggles.farmpuffshrooms = State end)
 --farmingtwo:Cheat("Farm Snowflakes ⚠️", function(State) kometa.toggles.farmsnowflakes = State end)
+farmingtwo:Cheat("Checkbox", "Farm Tickets ⚠️", function(State) kometa.toggles.farmtickets = State end)
 farmingtwo:Cheat("Checkbox", "Teleport To Rares ⚠️", function(State) kometa.toggles.farmrares = State end)
 farmingtwo:Cheat("Checkbox", "Auto Accept/Confirm Quests ⚙", function(State) kometa.toggles.autoquest = State end)
 farmingtwo:Cheat("Checkbox", "Auto Do Quests ⚙", function(State) kometa.toggles.autodoquest = State end)
@@ -756,10 +773,21 @@ mobkill:Cheat("Checkbox", "Auto Ant", function(State) kometa.toggles.autoant = S
 local amks = combtab:Sector("Auto Kill Mobs Settings")
 amks:Cheat("Textbox",'Kill Mobs After x Convertions', function(Value) kometa.vars.monstertimer = tonumber(Value) end, { placeholder = 'default = 3'})
 
+local statssector = statstab:Sector("Statistics")
+statssector:Cheat("Label", "Gained Honey")
+statssector:Cheat("Label", "Elapsed Time")
+statssector:Cheat("Label", "Farmed Sprouts")
+statssector:Cheat("Label", "Killed Vicious")
+statssector:Cheat("Label", "Killed Windy")
+statssector:Cheat("Label", "Farmed Ants")
+
+local mobstimers = statstab:Sector("Mob Timers")
+mobstimers:Cheat("Label", "Coming soon!")
+
 local wayp = wayptab:Sector("Waypoints")
 wayp:Cheat("Dropdown", "Field Teleports", function(Option) game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").FlowerZones:FindFirstChild(Option).CFrame end, {options = fieldstable})
-wayp:Cheat("Dropdown","Monster Teleports", function(Option) d = game:GetService("Workspace").MonsterSpawners:FindFirstChild(Option) game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(d.Position.X, d.Position.Y+3, d.Position.Z) end, {options = spawnerstable})
-wayp:Cheat("Dropdown","Toys Teleports", function(Option) d = game:GetService("Workspace").Toys:FindFirstChild(Option).Platform game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(d.Position.X, d.Position.Y+3, d.Position.Z) end, {options = toystable})
+wayp:Cheat("Dropdown", "Monster Teleports", function(Option) d = game:GetService("Workspace").MonsterSpawners:FindFirstChild(Option) game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(d.Position.X, d.Position.Y+3, d.Position.Z) end, {options = spawnerstable})
+wayp:Cheat("Dropdown", "Toys Teleports", function(Option) d = game:GetService("Workspace").Toys:FindFirstChild(Option).Platform game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(d.Position.X, d.Position.Y+3, d.Position.Z) end, {options = toystable})
 wayp:Cheat("Button", "Teleport to hive", function() game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Players").LocalPlayer.SpawnPos.Value end, {placeholder = ' '})
 
 local ghive = hivetab:Sector("Hive Position")
@@ -782,6 +810,16 @@ miscc:Cheat("Button", "Ant Challenge Semi-Godmode", function() api.tween(1, CFra
 miscc:Cheat("Checkbox", "Walk Speed", function(State) kometa.toggles.loopspeed = State end)
 miscc:Cheat("Checkbox", "Jump Power", function(State) kometa.toggles.loopjump = State end)
 miscc:Cheat("Checkbox", "Godmode", function(State) kometa.toggles.godmode = State if State then bssapi:Godmode(true) else bssapi:Godmode(false) end end)
+
+local webhooking = misctab:Sector("Discord Webhooking")
+webhooking:Cheat("Textbox", "Webhook", function(Value) temptable.webhook = Value end, {placeholder = ' '})
+webhooking:Cheat("Button", "Remind Webhook", function() api.notify('kometa', 'Your webhook is '..temptable.webhook) end, {text = ''})
+webhooking:Cheat("Checkbox", "Send After Converting", function(State) kometa.webhooking.convert = State end)
+webhooking:Cheat("Checkbox", "Send On Vicious", function(State) kometa.webhooking.vicious = State end)
+webhooking:Cheat("Checkbox", "Send On Windy", function(State) kometa.webhooking.windy = State end)
+webhooking:Cheat("Checkbox", "Send When Player Joins Server", function(State) kometa.webhooking.playeradded = State end)
+-- webhooking:Cheat("Checkbox", "Send On Connection Lost", function(State) kometa.webhooking.connectionlost = State end)
+
 local misco = misctab:Sector("Other")
 misco:Cheat("Dropdown", "Equip Accesories", function(Option) local ohString1 = "Equip" local ohTable2 = { ["Mute"] = false, ["Type"] = Option, ["Category"] = "Accessory" } game:GetService("ReplicatedStorage").Events.ItemPackageEvent:InvokeServer(ohString1, ohTable2) end, {options = accesoriestable})
 misco:Cheat("Dropdown", "Equip Masks", function(Option) local ohString1 = "Equip" local ohTable2 = { ["Mute"] = false, ["Type"] = Option, ["Category"] = "Accessory" } game:GetService("ReplicatedStorage").Events.ItemPackageEvent:InvokeServer(ohString1, ohTable2) end, {options = masktable})
@@ -1075,6 +1113,7 @@ task.spawn(function() while task.wait() do
             end
             temptable.converting = false
             temptable.act = temptable.act + 1
+            if kometa.webhooking.convert then api.imagehook(temptable.webhook, "Total Honey: `"..game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.MeterHUD.HoneyMeter.Bar.TextLabel.Text.."`\nGained Honey: `"..api.suffixstring(temptable.honeycurrent - temptable.honeystart).."`\nElapsed Time: `"..api.toHMS(temptable.stats.runningfor).."`", "kometa ☄️", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/f/f6/HoneyDrop.png/revision/latest/scale-to-width-down/90?cb=20200521143648&path-prefix=ru") end
             task.wait(6)
             if kometa.toggles.autoant and not game:GetService("Workspace").Toys["Ant Challenge"].Busy.Value and rtsg().Eggs.AntPass > 0 then farmant() end
             if kometa.toggles.autoquest then makequests() end
@@ -1117,6 +1156,7 @@ task.spawn(function()
 			task.wait(1)
 			temptable.float = false
             temptable.started.vicious = false
+            temptable.stats.killedvicious = temptable.stats.killedvicious + 1
 		end
 	end
 end)
@@ -1149,6 +1189,7 @@ task.spawn(function() while task.wait() do
             end
         end 
         enableall()
+        temptable.stats.killedwindy = temptable.stats.killedwindy + 1
         temptable.float = false
         temptable.started.windy = false
     end
@@ -1156,8 +1197,9 @@ end end)
 
 task.spawn(function() while task.wait(0.001) do
     if kometa.toggles.traincrab then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-259, 111.8, 496.4) * CFrame.fromEulerAnglesXYZ(0, 110, 90) temptable.float = true temptable.float = false end
-    if kometa.toggles.farmrares then for k,v in next, game.workspace.Collectibles:GetChildren() do if v.CFrame.YVector.Y == 1 then if v.Transparency == 0 then decal = v:FindFirstChildOfClass("Decal") for e,r in next, kometa.rares do if decal.Texture == r or decal.Texture == "rbxassetid://"..r then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame break end end end end end end
     if kometa.toggles.autodig then workspace.NPCs.Onett.Onett["Porcelain Dipper"].ClickEvent:FireServer() if game.Players.LocalPlayer then if game.Players.LocalPlayer.Character then if game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool") then if game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool"):FindFirstChild("ClickEvent", true) then clickevent = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool"):FindFirstChild("ClickEvent", true) or nil end end end if clickevent then clickevent:FireServer() end end end
+    if kometa.toggles.farmrares then for k,v in next, game.workspace.Collectibles:GetChildren() do if v.CFrame.YVector.Y == 1 then if v.Transparency == 0 then decal = v:FindFirstChildOfClass("Decal") for e,r in next, kometa.rares do if decal.Texture == r or decal.Texture == "rbxassetid://"..r then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame break end end end end end end
+    if kometa.toggles.farmtickets then for k,v in next, game.workspace.Collectibles:GetChildren() do if v.CFrame.YVector.Y == 1 then if v.Transparency == 0 then decal = v:FindFirstChildOfClass("Decal") if decal.Texture == '1674871631' or decal.Texture == "rbxassetid://1674871631" then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame break end end end end end
 end end)
 
 game:GetService("Workspace").Particles.Folder2.ChildAdded:Connect(function(child)
@@ -1172,11 +1214,13 @@ game:GetService("Workspace").Particles.Folder2.ChildRemoved:Connect(function(chi
         temptable.sprouts.detected = false
         temptable.sprouts.coords = ""
     end
+    temptable.stats.farmedsprouts = temptable.stats.farmedsprouts + 1
 end)
 
 Workspace.Particles.ChildAdded:Connect(function(instance)
     if string.find(instance.Name, "Vicious") then
         temptable.detected.vicious = true
+        if kometa.webhooking.vicious then api.imagehook(temptable.webhook, "Vicious Bee detected!", "kometa ☄️", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/1/1f/Vicious_Bee.png/revision/latest/scale-to-width-down/350?cb=20181130115012&path-prefix=ru") end
     end
 end)
 Workspace.Particles.ChildRemoved:Connect(function(instance)
@@ -1187,6 +1231,7 @@ end)
 game:GetService("Workspace").NPCBees.ChildAdded:Connect(function(v)
     if v.Name == "Windy" then
         task.wait(3) temptable.windy = v temptable.detected.windy = true
+        if kometa.webhooking.windy then api.imagehook(temptable.webhook, "Windy Bee detected!", "kometa ☄️", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/8/85/Windy_Bee.png/revision/latest?cb=20200404000105") end
     end
 end)
 game:GetService("Workspace").NPCBees.ChildRemoved:Connect(function(v)
@@ -1246,7 +1291,7 @@ task.spawn(function() while task.wait(.1) do
 end end)
 
 task.spawn(function() while task.wait(1) do
-    temptable.runningfor = temptable.runningfor + 1
+    temptable.stats.runningfor = temptable.stats.runningfor + 1
     temptable.honeycurrent = statsget().Totals.Honey
     if kometa.toggles.honeystorm then game.ReplicatedStorage.Events.ToyEvent:FireServer("Honeystorm") end
     if kometa.toggles.collectgingerbreads then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Gingerbread House") end
@@ -1265,7 +1310,12 @@ task.spawn(function() while task.wait(1) do
     end
     if kometa.toggles.clock then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Wealth Clock") end
     if kometa.toggles.freeantpass then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Free Ant Pass Dispenser") end
-    game.CoreGui.kometaUI.Container.Categories.Home.L["Main"].Container["Gained Honey: 0"].Title.Text = "Gained Honey: "..api.suffixstring(temptable.honeycurrent - temptable.honeystart)
+    game.CoreGui.kometaUI.Container.Categories.Statistics.L["Statistics"].Container["Gained Honey"].Title.Text = "Gained Honey: "..api.suffixstring(temptable.honeycurrent - temptable.honeystart)
+    game.CoreGui.kometaUI.Container.Categories.Statistics.L["Statistics"].Container["Elapsed Time"].Title.Text = "Elapsed Time: "..api.toHMS(temptable.stats.runningfor)
+    game.CoreGui.kometaUI.Container.Categories.Statistics.L["Statistics"].Container["Farmed Sprouts"].Title.Text = "Farmed Sprouts: "..temptable.stats.farmedsprouts
+    game.CoreGui.kometaUI.Container.Categories.Statistics.L["Statistics"].Container["Killed Windy"].Title.Text = "Killed Windy: "..temptable.stats.killedwindy
+    game.CoreGui.kometaUI.Container.Categories.Statistics.L["Statistics"].Container["Killed Vicious"].Title.Text = "Killed Vicious: "..temptable.stats.killedvicious
+    game.CoreGui.kometaUI.Container.Categories.Statistics.L["Statistics"].Container["Farmed Ants"].Title.Text = "Farmed Ants: "..temptable.stats.farmedants
 end end)
 
 game:GetService('RunService').Heartbeat:connect(function() 
@@ -1297,6 +1347,10 @@ task.spawn(function()while task.wait() do
         end
     end
 end end)
+
+game.Players.PlayerAdded:Connect(function(player)
+    if kometa.webhooking.playeradded then api.imagehook(temptable.webhook, player.Name.." joined your server", "kometa ☄️", "https://www.roblox.com/headshot-thumbnail/image?userId="..player.UserId.."&width=420&height=420&format=png") end
+end)
 
 game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
     humanoid = char:WaitForChild("Humanoid")
