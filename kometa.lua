@@ -138,7 +138,7 @@ local temptable = {
 
         game:GetService("ReplicatedStorage").Events.ConstructHiveCellFromEgg:InvokeServer(bo, ba, be, br)
     end,
-    findpopstar = false,
+    foundpopstar = false,
     item_names = {}
 }
 local planterst = {
