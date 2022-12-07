@@ -25,6 +25,11 @@ local kometa = {
     ["tween"] = function(time, pos) -- tween to position by (time) + (cframe)
         game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfo.new(time, Enum.EasingStyle.Linear), {CFrame = pos}):Play() task.wait(time)
     end,
+    ["tweenNoDelay"] = function(time, pos) -- tween to position by (time) + (cframe)
+        local tweenIt = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfo.new(time, Enum.EasingStyle.Linear), {CFrame = pos})
+        tweenIt:Play()
+        return tweenIt
+    end,
     ["walkTo"] = function(v3) -- walk to position (not pathfinding)
        game:GetService("Players").LocalPlayer.Character.Humanoid:MoveTo(v3) 
     end,
