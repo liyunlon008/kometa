@@ -168,7 +168,7 @@ local kometa = {
                 end
             end
         else
-            for _, obj in ipairs(path:GetDescendants()) do
+            for _, obj in ipairs(path:GetChildren()) do
                 if obj:IsA('BasePart') then
                     local distance = (root.Position - obj.Position).Magnitude
                     if distance < studs then
