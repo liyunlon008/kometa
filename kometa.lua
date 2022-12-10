@@ -20,7 +20,7 @@ local hi = false
 -- Script tables
 
 local temptable = {
-    version = "1.1.0",
+    version = "1.1.1",
     blackfield = "Ant Field",
     redfields = {},
     bluefields = {},
@@ -142,6 +142,9 @@ local temptable = {
     item_names = {}
 }
 local planterst = {
+    nil,
+    nil,
+    nil
 }
 
 if temptable.honeystart == 0 then temptable.honeystart = statstable.Totals.Honey end
@@ -326,21 +329,21 @@ local kometa = {
     planterssettings = {
         {
             enabled = false,
-            type = require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER[1],
+            Type = require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER[1],
             growth = 1,
             safepuffs = false,
             field = fieldstable[1]
         },
         {
             enabled = false,
-            type = require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER[1],
+            Type = require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER[1],
             growth = 1,
             safepuffs = false,
             field = fieldstable[2]
         },
         {
             enabled = false,
-            type = require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER[1],
+            Type = require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER[1],
             growth = 1,
             safepuffs = false,
             field = fieldstable[3]
@@ -516,10 +519,13 @@ function check(ok)
 end
 
 function getplanters()
-    table.clear(planterst)
     for i,v in pairs(debug.getupvalues(require(game:GetService("ReplicatedStorage").LocalPlanters).LoadPlanter)[4]) do 
-        if v.IsMine then
-            table.insert(planterst, {v.Type, v.ActorID, v.Puffshroom, v.GrowthPercent, v.Pos})
+        for e,r in pairs(kometa.planterssettings) do
+            if v.Type == r.Type and v.IsMine then
+                if planterst[e] == nil then
+                    planterst[e] = {v.Type, v.ActorID, v.Puffshroom, v.GrowthPercent, v.Pos}
+                end
+            end
         end
     end
 end
@@ -582,46 +588,53 @@ end
 
 function collectplanters()
     getplanters()
-    -- for i,v in pairs(planterst.plantername) do
-    --     if api.partwithnamepart(v, game:GetService("Workspace").Planters) and api.partwithnamepart(v, game:GetService("Workspace").Planters):FindFirstChild("Soil") then
-    --         soil = api.partwithnamepart(v, game:GetService("Workspace").Planters).Soil
-    --         api.humanoidrootpart().CFrame = soil.CFrame
-    --         game:GetService("ReplicatedStorage").Events.PlanterModelCollect:FireServer(planterst.planterid[i])
-    --         task.wait(.5)
-    --         game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer({["Name"] = v.." Planter"})
-    --         for i = 1, 5 do gettoken(soil.Position) end
-    --         task.wait(2)
-    --     end
-    -- end
     for i,v in pairs(planterst) do
         if kometa.planterssettings[i].enabled then
+            if v == nil then continue end
             if kometa.planterssettings[i].growth <= v[4] then
                 if v[3] and kometa.planterssettings[i].safepuffs then
                     continue
                 end
-                api.tween(1, CFrame.new(v[5]))
+                api.teleport(CFrame.new(v[5]))
                 game:GetService("ReplicatedStorage").Events.PlanterModelCollect:FireServer(v[2])
-                task.wait(.5)
+                task.wait(2)
                 -- game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer({["Name"] = v.." Planter"})
                 for i = 1, 5 do gettoken(CFrame.new(v[5]).Position) end
                 task.wait(2)
+                planterst[i] = nil
             end
         end
     end
 end
 
 function plantplanters()
-    getplanters()
+    -- getplanters()
+    -- for i,v in pairs(kometa.planterssettings) do
+    --     if v.enabled then
+    --         if planterst[i] then
+    --             continue
+    --         end
+    --         api.teleport(game:GetService("Workspace").FlowerZones:FindFirstChild(v.field).CFrame)
+    --         task.wait(2)
+    --         game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer({["Name"] = v.type.." Planter"})
+    --         task.wait(1)
+    --     end
+    -- end
     for i,v in pairs(kometa.planterssettings) do
         if v.enabled then
-            if planterst[i] then
-                continue
-            end
-            api.tween(1, game:GetService("Workspace").FlowerZones:FindFirstChild(v.field).CFrame)
-            task.wait(.5)
-            game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer({["Name"] = v.type.." Planter"})
+            if planterst[i] ~= nil then continue end
+            api.teleport(game:GetService("Workspace").FlowerZones:FindFirstChild(v.field).CFrame)
+            task.wait(2)
+            game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer({["Name"] = v.Type.." Planter"})
             task.wait(1)
         end
+        -- if kometa.planterssettings[i].enabled then
+        --     if v ~= nil then continue end
+        --     api.teleport(game:GetService("Workspace").FlowerZones:FindFirstChild(v.field).CFrame)
+        --     task.wait(2)
+        --     game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer({["Name"] = kometa.planterssettings[i].Type.." Planter"})
+        --     task.wait(1)
+        -- end
     end
 end
 
@@ -775,7 +788,7 @@ end
 function avoidmob()
     for i,v in next, game:GetService("Workspace").Monsters:GetChildren() do
         if v:FindFirstChild("Head") then
-            if (v.Head.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude < 30 and api.humanoid():GetState() ~= Enum.HumanoidStateType.Freefall then
+            if (v.Head.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude < 40 and api.humanoid():GetState() ~= Enum.HumanoidStateType.Freefall then
                 game.Players.LocalPlayer.Character.Humanoid.Jump = true
             end
         end
@@ -902,21 +915,21 @@ farmingtwo:Cheat("Checkbox", "Auto Special Sprout Summoner", function(State) kom
 farmingtwo:Cheat("Checkbox", "Auto Honeystorm", function(State) kometa.toggles.honeystorm = State end)
 
 local psec1 = planterstab:Sector("First Planter")
-psec1:Cheat("Dropdown", "Planter", function(Option) kometa.planterssettings[1].type = Option end, {options=require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER})
+psec1:Cheat("Dropdown", "Planter", function(Option) kometa.planterssettings[1].Type = Option end, {options=require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER})
 psec1:Cheat("Dropdown", "Field", function(Option) kometa.planterssettings[1].field = Option end, {options=fieldstable})
 psec1:Cheat("Slider", "Growth Percent", function(Value) kometa.planterssettings[1].growth = tonumber(Value)/100 or 1 end, {min = 0, max = 100, suffix = "%"})
 psec1:Cheat("Checkbox", "Auto Plant", function(State) kometa.planterssettings[1].enabled = State end)
 psec1:Cheat("Checkbox", "Ignore If Puffshrooms", function(State) kometa.planterssettings[1].safepuffs = State end)
 
 local psec2 = planterstab:Sector("Second Planter")
-psec2:Cheat("Dropdown", "Planter", function(Option) kometa.planterssettings[2].type = Option end, {options=require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER})
+psec2:Cheat("Dropdown", "Planter", function(Option) kometa.planterssettings[2].Type = Option end, {options=require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER})
 psec2:Cheat("Dropdown", "Field", function(Option) kometa.planterssettings[2].field = Option end, {options=fieldstable})
 psec2:Cheat("Slider", "Growth Percent", function(Value) kometa.planterssettings[2].growth = tonumber(Value)/100 or 1 end, {min = 0, max = 100, suffix = "%"})
 psec2:Cheat("Checkbox", "Auto Plant", function(State) kometa.planterssettings[2].enabled = State end)
 psec2:Cheat("Checkbox", "Ignore If Puffshrooms", function(State) kometa.planterssettings[2].safepuffs = State end)
 
 local psec3 = planterstab:Sector("Third Planter")
-psec3:Cheat("Dropdown", "Planter", function(Option) kometa.planterssettings[3].type = Option end, {options=require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER})
+psec3:Cheat("Dropdown", "Planter", function(Option) kometa.planterssettings[3].Type = Option end, {options=require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER})
 psec3:Cheat("Dropdown", "Field", function(Option) kometa.planterssettings[3].field = Option end, {options=fieldstable})
 psec3:Cheat("Slider", "Growth Percent", function(Value) kometa.planterssettings[3].growth = tonumber(Value)/100 or 1 end, {min = 0, max = 100, suffix = "%"})
 psec3:Cheat("Checkbox", "Auto Plant", function(State) kometa.planterssettings[3].enabled = State end)
@@ -1267,7 +1280,7 @@ task.spawn(function() while task.wait() do
                             disableall()
                             game:GetService("Workspace").Map.Ground.HighBlock.CanCollide = false 
                             mondopition = game.Workspace.Monsters["Mondo Chick (Lvl 8)"].Head.Position
-                            api.tween(1, CFrame.new(mondopition.x, mondopition.y - 60, mondopition.z))
+                            api.tween(1, CFrame.new(mondopition.x, mondopition.y - 50, mondopition.z))
                             task.wait(1)
                             temptable.float = true
                         end
