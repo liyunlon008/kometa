@@ -20,7 +20,7 @@ local hi = false
 -- Script tables
 
 local temptable = {
-    version = "1.1.1",
+    version = "1.1.2",
     blackfield = "Ant Field",
     redfields = {},
     bluefields = {},
@@ -297,7 +297,6 @@ local kometa = {
         walkspeed = 70,
         jumppower = 70,
         npcprefer = "All Quests",
-        tweendelay = 0.5,
         farmtype = "Walk",
         monstertimer = 3
     },
@@ -360,26 +359,14 @@ function farm(trying, important)
     if not IsToken(trying) then return end
     if important and kometa.toggles.bloatfarm and temptable.foundpopstar then temptable.float = true api.teleport(CFrame.new(trying.CFrame.Position) * CFrame.Angles(0, math.rad(180), 0)) end
     if kometa.toggles.loopfarmspeed then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = kometa.vars.farmspeed end
-    if setfflag and kometa.vars.farmtype == 'Tween' then
-        temptable.float = true
-        api.tweenNoDelay(kometa.vars.tweendelay or 0.5, CFrame.new(trying.CFrame.Position) * CFrame.Angles(0, math.rad(180), 0))
-    else
-        api.humanoid():MoveTo(trying.Position) 
-    end
+    api.humanoid():MoveTo(trying.Position) 
     repeat task.wait() until (trying.Position-api.humanoidrootpart().Position).magnitude <= 4 or not IsToken(trying) or not temptable.running
-    if setfflag and temptable.float and kometa.vars.farmtype == 'Tween' and not important then temptable.float = false end
 end
 
 function farmold(trying, important)
     if kometa.toggles.loopfarmspeed then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = kometa.vars.farmspeed end
-    if setfflag and kometa.vars.farmtype == 'Tween' then
-        temptable.float = true
-        api.tweenNoDelay(kometa.vars.tweendelay or 0.5, CFrame.new(trying.CFrame.Position) * CFrame.Angles(0, math.rad(180), 0))
-    else
-        api.humanoid():MoveTo(trying.Position) 
-    end
+    api.humanoid():MoveTo(trying.Position) 
     repeat task.wait() until (trying.Position-api.humanoidrootpart().Position).magnitude <= 4 or not IsToken(trying) or not temptable.running
-    if setfflag and temptable.float and kometa.vars.farmtype == 'Tween' then temptable.float = false end
 end
 
 function disableall()
@@ -751,14 +738,12 @@ function getcoco(v)
     -- task.wait(.1)
     repeat
         task.wait()
-        if setfflag and kometa.vars.farmtype == 'Tween' then
+        if setfflag then
             temptable.float = true
-            api.tweenNoDelay(0.1, v.CFrame)
-        else
-            api.humanoid():MoveTo(v.Position) 
         end
+        api.tweenNoDelay(0.1, v.CFrame)
     until not v.Parent
-    if setfflag and temptable.float and kometa.vars.farmtype == 'Tween' then temptable.float = false end
+    if setfflag and temptable.float then temptable.float = false end
     temptable.coconut = false
     table.remove(temptable.coconuts, table.find(temptable.coconuts, v))
 end
@@ -802,14 +787,8 @@ function getcrosshairs(v)
     -- api.walkTo(v.Position)
     repeat 
         task.wait() 
-        if setfflag and kometa.vars.farmtype == 'Tween' then
-            temptable.float = true
-            api.tweenNoDelay(0.25, v.CFrame)
-        else
-            api.humanoid():MoveTo(v.Position) 
-        end
+        api.walkTo(v.Position)
     until not v.Parent or v.BrickColor == BrickColor.new("Forest green") or v.BrickColor == BrickColor.new("Royal purple")
-    if setfflag and temptable.float and kometa.vars.farmtype == 'Tween' then temptable.float = false end
     task.wait(.1)
     temptable.crosshair = false
     table.remove(temptable.crosshairs, table.find(temptable.crosshairs, v))
@@ -1043,8 +1022,8 @@ end, {text = 'Spawn'})
 windsh:Cheat("Label", "") windsh:Cheat("Label", "") windsh:Cheat("Label", "") windsh:Cheat("Label", "") windsh:Cheat("Label", "") windsh:Cheat("Label", "")
 
 local farmsettings = setttab:Sector("Autofarm Settings")
-if setfflag then farmsettings:Cheat("Dropdown", "Autofarm Mode", function(Option) kometa.vars.farmtype = Option end, {options = {'Walk', 'Tween'}}) end
-if setfflag then farmsettings:Cheat("Textbox", "Tween Mode Delay", function(Option) kometa.vars.tweendelay = tonumber(Option) end, {placeholder = 'default - 0.5'}) end
+-- if setfflag then farmsettings:Cheat("Dropdown", "Autofarm Mode", function(Option) kometa.vars.farmtype = Option end, {options = {'Walk', 'Tween'}}) end
+-- if setfflag then farmsettings:Cheat("Textbox", "Tween Mode Delay", function(Option) kometa.vars.tweendelay = tonumber(Option) end, {placeholder = 'default - 0.5'}) end
 farmsettings:Cheat("Textbox", "Autofarming Walkspeed", function(Value) kometa.vars.farmspeed = Value end, {placeholder = "Default Value = 60"})
 farmsettings:Cheat("Checkbox", "^ Loop Speed On Autofarming", function(State) kometa.toggles.loopfarmspeed = State end)
 farmsettings:Cheat("Checkbox", "Don't Walk In Field", function(State) kometa.toggles.farmflower = State end)
@@ -1280,7 +1259,7 @@ task.spawn(function() while task.wait() do
                             disableall()
                             game:GetService("Workspace").Map.Ground.HighBlock.CanCollide = false 
                             mondopition = game.Workspace.Monsters["Mondo Chick (Lvl 8)"].Head.Position
-                            api.tween(1, CFrame.new(mondopition.x, mondopition.y - 50, mondopition.z))
+                            api.tween(1, CFrame.new(mondopition.x, mondopition.y - 60, mondopition.z))
                             task.wait(1)
                             temptable.float = true
                         end
