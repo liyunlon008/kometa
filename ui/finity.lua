@@ -402,7 +402,7 @@ function kometa.new(isdark, gprojectName, thinProject)
 			ZIndex = 2
 		})
 		
-		if thinProject.Width.Offset > 750 then
+		if thinProjeect and thinProject.Width.Offset > 750 then
 			category.R = kometa:Create("Frame", {
 				Name = "R",
 				AnchorPoint = Vector2.new(1, 0),
@@ -414,7 +414,7 @@ function kometa.new(isdark, gprojectName, thinProject)
 			})
 		end
 		
-		if thinProject.Width.Offset <= 750 then
+		if not thinProject or thinProject.Width.Offset <= 750 then
 			category.L.Size = UDim2.new(1, -20, 1, -3)
 		end
 		
@@ -480,7 +480,7 @@ function kometa.new(isdark, gprojectName, thinProject)
 		category.container.Parent = self2.categories
 		category.button.Parent = self2.sidebar
 		
-		if thinProject.Width.Offset > 750 then
+		if not thinProject or thinProject.Width.Offset > 750 then
 			category.R.Parent = category.container
 		end
 		
@@ -488,7 +488,7 @@ function kometa.new(isdark, gprojectName, thinProject)
 		category.hider.Parent = category.container
 
 		local function calculateSector()
-			if thinProject.Width.Offset <= 750 then
+			if thinProjeect and thinProject.Width.Offset <= 750 then
 				return "L"
 			end
 			
