@@ -242,7 +242,7 @@ function kometa.new(isdark, gprojectName, thinProject)
         Modal = true;
     }) self2.modal.Parent = self2.userinterface;
 	
-	if thinProject and typeof(thinProject) == "UDim2" then
+	if thinProject and typeof(thinProject) == "UDim2" and thinProject then
 		self2.container.Size = thinProject
 	end
 
