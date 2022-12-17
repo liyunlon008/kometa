@@ -13,6 +13,47 @@ local Websocket_Manager = {
                 return nil
             end
         end
+    end,
+    ['SaveConfig'] = function(Websocket, Config)
+        if Websocket and Config then
+            if Krnl then
+                Websocket:Send(game:GetService('HttpService'):JSONEncode({
+                    action = 'ConfigSave',
+                    hwid = game:GetService("RbxAnalyticsService"):GetClientId(),
+                    cfg = Config
+                }))
+
+                Websocket.OnMessage:Connect(function(Message)
+                    if game:GetService('HttpService'):JSONDecode(Message) then
+                        local Data = game:GetService('HttpService'):JSONDecode(Message)
+                        if Data.statusCode == 601 then
+                            return Data.id
+                        else
+                            return nil
+                        end
+                    end
+                    Websocket:Close()
+                end)
+            elseif syn then
+                Websocket:Send(game:GetService('HttpService'):JSONEncode({
+                    action = 'ConfigSave',
+                    hwid = game:GetService("RbxAnalyticsService"):GetClientId(),
+                    cfg = Config
+                }))
+
+                Websocket.OnMessage:Connect(function(Message)
+                    if game:GetService('HttpService'):JSONDecode(Message) then
+                        local Data = game:GetService('HttpService'):JSONDecode(Message)
+                        if Data.statusCode == 601 then
+                            return Data.id
+                        else
+                            return nil
+                        end
+                    end
+                    Websocket:Close()
+                end)
+            end
+        end
     end
 }
 
