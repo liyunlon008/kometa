@@ -1,4 +1,8 @@
-local Websocket_Manager = {
+local Websocket_Manager = {}
+
+self = Websocket_Manager
+
+Websocket_Manager = {
     Websocket = nil,
     ['Connect'] = function()
         if Krnl then
