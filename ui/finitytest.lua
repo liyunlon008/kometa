@@ -439,7 +439,7 @@ function kometa.new(isdark, gprojectName, thinProject)
 					largestListSize = largestListSize
 				end
 				
-				category.container.CanvasSize = UDim2.new(0, 0, 0, largestListSize + 25)
+				category.container.CanvasSize = UDim2.new(0, 0, 0, largestListSize + 100)
 			end
 			
 			uilistlayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(computeSizeChange)
