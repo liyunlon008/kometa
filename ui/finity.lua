@@ -150,8 +150,14 @@ function kometa.new(isdark, gprojectName, thinProject)
 	local theme = kometa.theme
 	local projectName = false
 	local thinMenu = false
-	
-	if thinProject and typeof(thinProject) == "UDim2" then if thinProject.Width.Offset > 750 then thinProject = nil end end
+
+	if typeof(thinProject) == 'table' then
+		if thinProject[1] and thinProject[2] then
+			thinProject = UDim2.new(0, thinProject[1], 0, thinProject[2])
+		end
+	end
+	if thinProject ~= nil and typeof(thinProject) ~= 'table' then thinProject = nil end
+
 	if isdark == true then theme = kometa.dark_theme end
 	if gprojectName then projectName = gprojectName end
 	if thinProject then thinMenu = thinProject end
@@ -396,7 +402,7 @@ function kometa.new(isdark, gprojectName, thinProject)
 			ZIndex = 2
 		})
 		
-		if not thinProject then
+		if thinProject.Width.Offset > 750 then
 			category.R = kometa:Create("Frame", {
 				Name = "R",
 				AnchorPoint = Vector2.new(1, 0),
@@ -408,7 +414,7 @@ function kometa.new(isdark, gprojectName, thinProject)
 			})
 		end
 		
-		if thinProject then
+		if thinProject.Width.Offset <= 750 then
 			category.L.Size = UDim2.new(1, -20, 1, -3)
 		end
 		
@@ -474,7 +480,7 @@ function kometa.new(isdark, gprojectName, thinProject)
 		category.container.Parent = self2.categories
 		category.button.Parent = self2.sidebar
 		
-		if not thinProject then
+		if thinProject.Width.Offset > 750 then
 			category.R.Parent = category.container
 		end
 		
@@ -482,7 +488,7 @@ function kometa.new(isdark, gprojectName, thinProject)
 		category.hider.Parent = category.container
 
 		local function calculateSector()
-			if thinProject then
+			if thinProject.Width.Offset <= 750 then
 				return "L"
 			end
 			
