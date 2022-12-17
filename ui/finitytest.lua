@@ -433,8 +433,9 @@ function kometa.new(isdark, gprojectName, thinProject)
 			local function computeSizeChange()
 				local largestListSize = 0
 				
-				largestListSize = uilistlayout.AbsoluteContentSize.Y + 50
+				largestListSize = uilistlayout.AbsoluteContentSize.Y
 				
+				print(largestListSize)
 				if uilistlayout2.AbsoluteContentSize.Y > largestListSize then
 					largestListSize = largestListSize
 				end
