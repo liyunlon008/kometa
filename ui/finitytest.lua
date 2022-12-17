@@ -1,1884 +1,1413 @@
-local api = loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/api/api.lua"))()
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/ui/finity.lua"))()
-local bssapi = loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/api/bssapi.lua"))()
+--[[
+   __          __     _____  _   _ _____ _   _  _____ 
+   \ \        / /\   |  __ \| \ | |_   _| \ | |/ ____|
+    \ \  /\  / /  \  | |__) |  \| | | | |  \| | |  __ 
+     \ \/  \/ / /\ \ |  _  /| . ` | | | | . ` | | |_ |
+      \  /\  / ____ \| | \ \| |\  |_| |_| |\  | |__| |
+       \/  \/_/    \_\_|  \_\_| \_|_____|_| \_|\_____|
+  
+  This is a customized & forked version of finity UI for me. I am not the creator of finity UI, I just modified it                                                 
+   
+finity author:
+	detourious @ v3rmillion.net		
+--]]
 
-if not isfolder("kometa") then makefolder("kometa") end
-if isfile('kometa.txt') == false then (syn and syn.request or http_request)({ Url = "http://127.0.0.1:6463/rpc?v=1",Method = "POST",Headers = {["Content-Type"] = "application/json",["Origin"] = "https://discord.com"},Body = game:GetService("HttpService"):JSONEncode({cmd = "INVITE_BROWSER",args = {code = "2a5gVpcpzv"},nonce = game:GetService("HttpService"):GenerateGUID(false)}),writefile('kometa.txt', "discord")})end
+local cachename = "kometaUI"
+if shared.framename then
+	cachename = shared.framename
+else
+	shared.framename = cachename
+end
 
--- Script temporary variables
+local kometa = {}
+kometa.gs = {}
 
-local playerstatsevent = game:GetService("ReplicatedStorage").Events.RetrievePlayerStats
-local statstable = playerstatsevent:InvokeServer()
-local monsterspawners = game:GetService("Workspace").MonsterSpawners
-local rarename
-function rtsg() tab = game.ReplicatedStorage.Events.RetrievePlayerStats:InvokeServer() return tab end
-function maskequip(mask) local ohString1 = "Equip" local ohTable2 = { ["Mute"] = false, ["Type"] = mask, ["Category"] = "Accessory"} game:GetService("ReplicatedStorage").Events.ItemPackageEvent:InvokeServer(ohString1, ohTable2) end
-local lasttouched = nil
-local done = true
-local hi = false
+kometa.theme = { -- light
+	main_container = Color3.fromRGB(249, 249, 255),
+	separator_color = Color3.fromRGB(223, 219, 228),
 
--- Script tables
+	text_color = Color3.fromRGB(96, 96, 96),
 
-local temptable = {
-    version = "1.2.0",
-    blackfield = "Ant Field",
-    redfields = {},
-    bluefields = {},
-    whitefields = {},
-    shouldiconvertballoonnow = false,
-    balloondetected = false,
-    puffshroomdetected = false,
-    magnitude = 70,
-    size = nil,
-    running = false,
-    configname = "",
-    tokenpath = game:GetService("Workspace").Collectibles,
-    started = {
-        vicious = false,
-        mondo = false,
-        windy = false,
-        ant = false,
-        monsters = false
-    },
-    detected = {
-        vicious = false,
-        windy = false
-    },
-    tokensfarm = false,
-    converting = false,
-    honeystart = 0,
-    grib = nil,
-    gribpos = CFrame.new(0,0,0),
-    honeycurrent = statstable.Totals.Honey,
-    dead = false,
-    float = false,
-    pepsigodmode = false,
-    pepsiautodig = false,
-    alpha = false,
-    beta = false,
-    myhiveis = false,
-    invis = false,
-    windy = nil,
-    collecting = {
-        tickets = false,
-        rares = false
-    },
-    sprouts = {
-        detected = false,
-        coords
-    },
-    cache = {
-        autofarm = false,
-        killmondo = false,
-        vicious = false,
-        windy = false
-    },
-    allplanters = {},
-    planters = {
-        planter = {},
-        cframe = {},
-        activeplanters = {
-            type = {},
-            id = {}
-        }
-    },
-    monstertypes = {"Ladybug", "Rhino", "Spider", "Scorpion", "Mantis", "Werewolf"},
-    ["stopapypa"] = function(path, part)
-        local Closest
-        for i,v in next, path:GetChildren() do
-            if v.Name ~= "PlanterBulb" then
-                if Closest == nil then
-                    Closest = v.Soil
-                else
-                    if (part.Position - v.Soil.Position).magnitude < (Closest.Position - part.Position).magnitude then
-                        Closest = v.Soil
-                    end
-                end
-            end
-        end
-        return Closest
-    end,
-    coconuts = {},
-    crosshairs = {},
-    FuzzyBombs = {},
-    crosshair = false,
-    coconut = false,
-    fuzzy = false,
-    act = 0,
-    ['touchedfunction'] = function(v)
-        if lasttouched ~= v then
-            if v.Parent.Name == "FlowerZones" then
-                if v:FindFirstChild("ColorGroup") then
-                    if tostring(v.ColorGroup.Value) == "Red" then
-                        maskequip("Demon Mask")
-                    elseif tostring(v.ColorGroup.Value) == "Blue" then
-                        maskequip("Diamond Mask")
-                    end
-                else
-                    maskequip("Gummy Mask")
-                end
-                lasttouched = v
-            end
-        end
-    end,
-    stats = {
-        runningfor = 0,
-        killedvicious = 0,
-        killedwindy = 0;
-        farmedsprouts = 0,
-        farmedants = 0,
-        sincelasthoneymaking = 0,
-    },
-    oldtool = rtsg()["EquippedCollector"],
-    ['gacf'] = function(part, st)
-        coordd = CFrame.new(part.Position.X, part.Position.Y+st, part.Position.Z)
-        return coordd
-    end,
-    ['feed'] = function(x, y, type, amount)
-        if not amount then
-            amount = 1
-        end
-        local bo = tonumber(x)
-        local ba = tonumber(y)
-        local be = type
-        local br = tonumber(amount)
+	category_button_background = Color3.fromRGB(223, 219, 228),
+	category_button_border = Color3.fromRGB(200, 196, 204),
 
-        game:GetService("ReplicatedStorage").Events.ConstructHiveCellFromEgg:InvokeServer(bo, ba, be, br)
-    end,
-    foundpopstar = false,
-    item_names = {}
-}
-local planterst = {}
-local planterstindexed = {}
+	checkbox_checked = Color3.fromRGB(114, 214, 112),
+	checkbox_outer = Color3.fromRGB(198, 189, 202),
+	checkbox_inner = Color3.fromRGB(249, 239, 255),
 
-if temptable.honeystart == 0 then temptable.honeystart = statstable.Totals.Honey end
+	slider_color = Color3.fromRGB(114, 214, 112),
+	slider_color_sliding = Color3.fromRGB(114, 214, 112),
+	slider_background = Color3.fromRGB(198, 188, 202),
+	slider_text = Color3.fromRGB(112, 112, 112),
 
-for i,v in next, game:GetService("Workspace").MonsterSpawners:GetDescendants() do if v.Name == "TimerAttachment" then v.Name = "Attachment" end end
-for i,v in next, game:GetService("Workspace").MonsterSpawners:GetChildren() do if v.Name == "RoseBush" then v.Name = "ScorpionBush" elseif v.Name == "RoseBush2" then v.Name = "ScorpionBush2" end end
-for i,v in next, game:GetService("Workspace").FlowerZones:GetChildren() do if v:FindFirstChild("ColorGroup") then if v:FindFirstChild("ColorGroup").Value == "Red" then table.insert(temptable.redfields, v.Name) elseif v:FindFirstChild("ColorGroup").Value == "Blue" then table.insert(temptable.bluefields, v.Name) end else table.insert(temptable.whitefields, v.Name) end end
-local flowertable = {}
-for _,z in next, game:GetService("Workspace").Flowers:GetChildren() do table.insert(flowertable, z.Position) end
-local masktable = {}
-for _,v in next, game:GetService("ReplicatedStorage").Accessories:GetChildren() do if string.match(v.Name, "Mask") then table.insert(masktable, v.Name) end end
-local collectorstable = {}
-for _,v in next, getupvalues(require(game:GetService("ReplicatedStorage").Collectors).Exists) do for e,r in next, v do table.insert(collectorstable, e) end end
-local beestable = {}
-for _,v in next, game:GetService("ReplicatedStorage").BeeModels:GetChildren() do table.insert(beestable, v.Name..' Bee') end
-local fieldstable = {}
-for _,v in next, game:GetService("Workspace").FlowerZones:GetChildren() do table.insert(fieldstable, v.Name) end
-local toystable = {}
-for _,v in next, game:GetService("Workspace").Toys:GetChildren() do table.insert(toystable, v.Name) end
-local spawnerstable = {}
-for _,v in next, game:GetService("Workspace").MonsterSpawners:GetChildren() do table.insert(spawnerstable, v.Name) end
-local accesoriestable = {}
-for _,v in next, game:GetService("ReplicatedStorage").Accessories:GetChildren() do if v.Name ~= "UpdateMeter" then table.insert(accesoriestable, v.Name) end end
-for i,v in pairs(getupvalues(require(game:GetService("ReplicatedStorage").PlanterTypes).GetTypes)) do for e,z in pairs(v) do table.insert(temptable.allplanters, e) end end
-for v,_ in next, rtsg().Eggs do table.insert(temptable.item_names, v) end
-table.sort(fieldstable)
-table.sort(accesoriestable)
-table.sort(toystable)
-table.sort(spawnerstable)
-table.sort(temptable.item_names)
-table.sort(masktable)
-table.sort(temptable.allplanters)
-table.sort(collectorstable)
-table.sort(beestable)
+	textbox_background = Color3.fromRGB(198, 189, 202),
+	textbox_background_hover = Color3.fromRGB(215, 206, 227),
+	textbox_text = Color3.fromRGB(112, 112, 112),
+	textbox_text_hover = Color3.fromRGB(50, 50, 50),
+	textbox_placeholder = Color3.fromRGB(178, 178, 178),
 
-for i,v in pairs(getupvalues(require(game:GetService("ReplicatedStorage").PlanterTypes).GetTypes)) do for e,z in pairs(v) do planterst[e] = z table.insert(planterstindexed, z) end end
-table.sort(planterst)
-for i,v in pairs(planterst) do planterst[i] = {} end
-
--- float pad
-
-local floatpad = Instance.new("Part", game:GetService("Workspace"))
-floatpad.CanCollide = false
-floatpad.Anchored = true
-floatpad.Transparency = 1
-floatpad.Name = "FloatPad"
-
--- cococrab
-
-local cocopad = Instance.new("Part", game:GetService("Workspace"))
-cocopad.Name = "Coconut Part"
-cocopad.Anchored = true
-cocopad.Transparency = 1
-cocopad.Size = Vector3.new(10, 1, 10)
-cocopad.Position = Vector3.new(-307.52117919922, 105.91863250732, 467.86791992188)
-
-local popfolder = Instance.new("Folder", game:GetService("Workspace").Particles)
-popfolder.Name = "PopStars"
-
--- antfarm
-
-local antpart = Instance.new("Part", workspace)
-antpart.Name = "Ant Autofarm Part"
-antpart.Position = Vector3.new(96, 47, 553)
-antpart.Anchored = true
-antpart.Size = Vector3.new(128, 1, 50)
-antpart.Transparency = 1
-antpart.CanCollide = false
-
--- config
-
-local kometa = {
-    rares = {},
-    priority = {},
-    bestfields = {
-        red = "Pepper Patch",
-        white = "Coconut Field",
-        blue = "Stump Field"
-    },
-    blacklistedfields = {},
-    killerkometa = {},
-    bltokens = {},
-    toggles = {
-        autofarm = false,
-        farmclosestleaf = false,
-        farmbubbles = false,
-        autodig = false,
-        collectorsteal = false,
-        farmrares = false,
-        farmtickets = false,
-        rgbui = false,
-        farmflower = false,
-        farmfuzzy = false,
-        farmcoco = false,
-        farmflame = false,
-        farmclouds = false,
-        killmondo = false,
-        killvicious = false,
-        loopspeed = false,
-        loopjump = false,
-        autoquest = false,
-        autoboosters = false,
-        autodispense = false,
-        clock = false,
-        freeantpass = false,
-        honeystorm = false,
-        autodoquest = false,
-        disableseperators = false,
-        npctoggle = false,
-        loopfarmspeed = false,
-        mobquests = false,
-        traincrab = false,
-        avoidmobs = false,
-        farmsprouts = false,
-        enabletokenblacklisting = false,
-        farmballoons = false,
-        farmsnowflakes = false,
-        collectgingerbreads = false,
-        collectcrosshairs = false,
-        farmpuffshrooms = false,
-        tptonpc = false,
-        donotfarmtokens = false,
-        convertballoons = false,
-        --autostockings = false,
-        --autosamovar = false,
-        --autoonettart = false,
-        --autocandles = false,
-        --autofeast = false,
-        --autoplanters = false,
-        autokillmobs = false,
-        autoant = false,
-        killwindy = false,
-        godmode = false,
-        disablerender = false,
-        bloatfarm = false,
-        autodonate = false,
-        donotdonatedrop = false,
-        instantconverters = false,
-        autospawnsprout = false,
-        faceballoons = false,
-        faceflames = false,
-        visualnight = false,
-        convertminutestoggle = false,
-    },
-    vars = {
-        field = "Ant Field",
-        donatit = {"Treat", 1},
-        convertat = 100,
-        farmspeed = 60,
-        prefer = "Tokens",
-        walkspeed = 70,
-        jumppower = 70,
-        npcprefer = "All Quests",
-        farmtype = "Walk",
-        monstertimer = 3,
-        convertminutes = 45
-    },
-    dispensesettings = {
-        blub = false,
-        straw = false,
-        treat = false,
-        coconut = false,
-        glue = false,
-        rj = false,
-        white = false,
-        red = false,
-        blue = false
-    },
-    beessettings = {
-        general = {
-            x = 1,
-            y = 1,
-            amount = 1
-        },
-        usb = "",
-        usbtoggle = false,
-        ugb = false,
-        foodtype = "Treat",
-        af = false,
-        mutation = "Convert Amount",
-        umb = false
-    },
-    webhooking = {
-        convert = false,
-        vicious = false,
-        windy = false,
-        playeradded = false,
-        connectionlost = false
-    },
-    planterssettings = {
-        {
-            enabled = false,
-            Type = require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER[1],
-            growth = 1,
-            safepuffs = false,
-            field = fieldstable[1]
-        },
-        {
-            enabled = false,
-            Type = require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER[1],
-            growth = 1,
-            safepuffs = false,
-            field = fieldstable[2]
-        },
-        {
-            enabled = false,
-            Type = require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER[1],
-            growth = 1,
-            safepuffs = false,
-            field = fieldstable[3]
-        }
-    }
+	dropdown_background = Color3.fromRGB(198, 189, 202),
+	dropdown_text = Color3.fromRGB(112, 112, 112),
+	dropdown_text_hover = Color3.fromRGB(50, 50, 50),
+	dropdown_scrollbar_color = Color3.fromRGB(198, 189, 202),
+	
+	button_background = Color3.fromRGB(198, 189, 202),
+	button_background_hover = Color3.fromRGB(215, 206, 227),
+	button_background_down = Color3.fromRGB(178, 169, 182),
+	
+	scrollbar_color = Color3.fromRGB(198, 189, 202),
 }
 
-local kometawebhook = {
-    webhook = '',
+kometa.dark_theme = { -- dark
+	main_container = Color3.fromRGB(23, 23, 23),
+	separator_color = Color3.fromRGB(72, 72, 72),
+
+	text_color = Color3.fromRGB(206, 206, 206),
+
+	category_button_background = Color3.fromRGB(63, 62, 65),
+	category_button_border = Color3.fromRGB(72, 71, 74),
+
+	checkbox_checked = Color3.fromRGB(164, 84, 255),
+	checkbox_outer = Color3.fromRGB(37, 34, 41),
+	checkbox_inner = Color3.fromRGB(37, 34, 41),
+
+	slider_color = Color3.fromRGB(164, 84, 255),
+	slider_color_sliding = Color3.fromRGB(255, 255, 255),
+	slider_background = Color3.fromRGB(37, 34, 41),
+	slider_text = Color3.fromRGB(177, 177, 177),
+
+	textbox_background = Color3.fromRGB(164, 84, 255),
+	textbox_background_hover = Color3.fromRGB(76, 61, 100),
+	textbox_text = Color3.fromRGB(195, 195, 195),
+	textbox_text_hover = Color3.fromRGB(232, 232, 232),
+	textbox_placeholder = Color3.fromRGB(135, 135, 138),
+
+	dropdown_background = Color3.fromRGB(164, 84, 255),
+	dropdown_text = Color3.fromRGB(195, 195, 195),
+	dropdown_text_hover = Color3.fromRGB(255,255,255),
+	dropdown_scrollbar_color = Color3.fromRGB(255,255,255),
+
+	button_background = Color3.fromRGB(164, 84, 255),
+	button_background_hover = Color3.fromRGB(76, 61, 100),
+	button_background_down = Color3.fromRGB(194, 141, 255),
+
+	scrollbar_color = Color3.fromRGB(118, 118, 121),
 }
 
-local defaultkometa = kometa
-local defaultkometawebhook = kometawebhook
+setmetatable(kometa.gs, {
+	__index = function(_, service)
+		return game:GetService(service)
+	end,
+	__newindex = function(t, i)
+		t[i] = nil
+		return
+	end
+})
 
 
--- functions
+local mouse = kometa.gs["Players"].LocalPlayer:GetMouse()
 
-function statsget() local StatCache = require(game.ReplicatedStorage.ClientStatCache) local stats = StatCache:Get() return stats end
-function farm(trying, important)
-    if not IsToken(trying) then return end
-    if kometa.toggles.faceballoons and findballoon() ~= nil and findballoon():FindFirstChild("BalloonRoot") then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findballoon().BalloonRoot.Position.X, api.humanoidrootpart().Position.Y, findballoon().BalloonRoot.Position.Z)) end
-    if kometa.toggles.faceflames and findclosestflame() ~= nil then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findclosestflame().Position.X, api.humanoidrootpart().Position.Y, findclosestflame().Position.Z)) end
-    if important and kometa.toggles.bloatfarm and temptable.foundpopstar then temptable.float = true api.teleport(CFrame.new(trying.CFrame.Position) * CFrame.Angles(0, math.rad(180), 0)) end
-    -- if kometa.toggles.loopfarmspeed then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = kometa.vars.farmspeed end
-    api.humanoid().WalkSpeed = math.random(30, 70)
-    api.humanoid().AutoRotate = false
-    api.humanoid():MoveTo(trying.Position) 
-    repeat task.wait() until (trying.Position-api.humanoidrootpart().Position).magnitude <= 5 or not IsToken(trying) or not temptable.running
-    api.humanoid().AutoRotate = true
+function kometa:Create(class, properties)
+	local object = Instance.new(class)
+
+	for prop, val in next, properties do
+		if object[prop] and prop ~= "Parent" then
+			object[prop] = val
+		end
+	end
+
+	return object
 end
 
-function farmold(trying, important)
-    if kometa.toggles.faceballoons and findballoon() then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findballoon().BalloonRoot.Position.X, api.humanoidrootpart().Position.Y, findballoon().BalloonRoot.Position.Z)) end
-    if kometa.toggles.faceflames and findclosestflame() then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findclosestflame().Position.X, api.humanoidrootpart().Position.Y, findclosestflame().Position.Z)) end
-    -- if kometa.toggles.loopfarmspeed then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = kometa.vars.farmspeed end
-    api.humanoid().WalkSpeed = math.random(30, 70)
-    api.humanoid().AutoRotate = false
-    api.humanoid():MoveTo(trying.Position) 
-    repeat task.wait() until (trying.Position-api.humanoidrootpart().Position).magnitude <= 5 or not IsToken(trying) or not temptable.running
-    api.humanoid().AutoRotate = true
+function kometa:addShadow(object, transparency)
+	local shadow = self:Create("ImageLabel", {
+		Name = "Shadow",
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0.5, 0, 0.5, 4),
+		Size = UDim2.new(1, 6, 1, 6),
+		Image = "rbxassetid://1316045217",
+		ImageTransparency = transparency and true or 0.5,
+		ImageColor3 = Color3.fromRGB(35, 35, 35),
+		ScaleType = Enum.ScaleType.Slice,
+		SliceCenter = Rect.new(10, 10, 118, 118)
+	})
+
+	shadow.Parent = object
 end
 
-function farmtickets(v)
-    if kometa.toggles.farmtickets then 
-        if v.CFrame.YVector.Y == 1 and v.Transparency < 0.9 and v ~= nil and v.Parent ~= nil then 
-            decal = v:FindFirstChildOfClass("Decal") 
-            if decal.Texture ~= "1674871631" and decal.Texture ~= "rbxassetid://1674871631" then return end
-            temptable.collecting.tickets = true
-            temptable.float = true
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(20, 0, 0) 
-            task.wait(.1) 
-            repeat 
-                task.wait() 
-                api.humanoid().WalkSpeed = 25 
-                api.walkTo(v.Position)
-            until not v.Parent or v.CFrame.YVector.Y ~= 1 
-            temptable.collecting.tickets = false
-            if temptable.float then temptable.float = false end
-        end
-    end 
-end
+function kometa.new(isdark, gprojectName, thinProject)
+	local kometaObject = {}
+	local self2 = kometaObject
+	local self = kometa
 
-function farmrares(v)
-    if kometa.toggles.farmrares then 
-        if v.CFrame.YVector.Y == 1 and v.Transparency < 0.9 and v ~= nil and v.Parent ~= nil then
-            decal = v:FindFirstChildOfClass("Decal") 
-            if not table.find(kometa.rares, string.split(decal.Texture, 'rbxassetid://')[2]) then return end
-            temptable.collecting.rares = true
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(20, 0, 0) 
-            task.wait(.1) 
-            temptable.float = true
-            repeat 
-                task.wait() 
-                api.humanoid().WalkSpeed = 25 
-                api.walkTo(v.Position)
-            until not v.Parent or v.CFrame.YVector.Y ~= 1 
-            temptable.collecting.rares = false
-            if temptable.float then temptable.float = false end
-        end 
-    end
-end
+	if not kometa.gs["RunService"]:IsStudio() and self.gs["CoreGui"]:FindFirstChild(cachename) then
+		warn("kometa:", "instance already exists in coregui!")
+		
+		return
+	end
 
-function disableall()
-    if kometa.toggles.autofarm and not temptable.converting then
-        temptable.cache.autofarm = true
-        kometa.toggles.autofarm = false
-    end
-    if kometa.toggles.killmondo and not temptable.started.mondo then
-        kometa.toggles.killmondo = false
-        temptable.cache.killmondo = true
-    end
-    if kometa.toggles.killvicious and not temptable.started.vicious then
-        kometa.toggles.killvicious = false
-        temptable.cache.vicious = true
-    end
-    if kometa.toggles.killwindy and not temptable.started.windy then
-        kometa.toggles.killwindy = false
-        temptable.cache.windy = true
-    end
-end
+	local theme = kometa.theme
+	local projectName = false
+	local thinMenu = false
+	
+	if isdark == true then theme = kometa.dark_theme end
+	if gprojectName then projectName = gprojectName end
+	if thinProject then thinMenu = thinProject end
+	
+	local toggled = true
+	local typing = false
+	local firstCategory = true
+    local savedposition = UDim2.new(0.5, 0, 0.5, 0)
+    
 
-function enableall()
-    if temptable.cache.autofarm then
-        kometa.toggles.autofarm = true
-        temptable.cache.autofarm = false
-    end
-    if temptable.cache.killmondo then
-        kometa.toggles.killmondo = true
-        temptable.cache.killmondo = false
-    end
-    if temptable.cache.vicious then
-        kometa.toggles.killvicious = true
-        temptable.cache.vicious = false
-    end
-    if temptable.cache.windy then
-        kometa.toggles.killwindy = true
-        temptable.cache.windy = false
-    end
-end
+	local kometaData
+	kometaData = {
+		UpConnection = nil,
+		ToggleKey = Enum.KeyCode.Home,
+	}
 
-function gettoken(v3)
-    if not v3 then
-        v3 = fieldposition
-    end
-    task.wait()
-    if kometa.toggles.bloatfarm and temptable.foundpopstar then return end
-    for e,r in next, game:GetService("Workspace").Collectibles:GetChildren() do
-        itb = false
-        if r:FindFirstChildOfClass("Decal") and kometa.toggles.enabletokenblacklisting then
-            if api.findvalue(kometa.bltokens, string.split(r:FindFirstChildOfClass("Decal").Texture, 'rbxassetid://')[2]) then
-                itb = true
-            end
-        end
-        if tonumber((r.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) <= temptable.magnitude/1.2 and not itb and (v3-r.Position).magnitude <= temptable.magnitude then
-            farm(r)
-        end
-    end
-end
+	self2.ChangeToggleKey = function(NewKey)
+		kometaData.ToggleKey = NewKey
+		
+		if not projectName then
+			self2.tip.Text = "Press '".. string.sub(tostring(NewKey), 14) .."' to hide this menu"
+		end
+		
+		if kometaData.UpConnection then
+			kometaData.UpConnection:Disconnect()
+		end
 
-function getlinktoken(v3)
-    if not v3 then
-        v3 = fieldposition
-    end
-    task.wait()
-    if kometa.toggles.bloatfarm and temptable.foundpopstar then return end
-    for e,r in next, game:GetService("Workspace").Collectibles:GetChildren() do
-        if r:FindFirstChildOfClass("Decal") and (r:FindFirstChildOfClass("Decal").Texture == '1629547638' or r:FindFirstChildOfClass("Decal").Texture == 'rbxassetid://1629547638') then
-            if tonumber((r.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) <= temptable.magnitude/1.2 and (v3-r.Position).magnitude <= temptable.magnitude then
-                farm(r)
-                break
-            end
-        end
-    end
-end
+		kometaData.UpConnection = kometa.gs["UserInputService"].InputEnded:Connect(function(Input)
+			if Input.KeyCode == kometaData.ToggleKey and not typing then
+                toggled = not toggled
 
-function makesprinklers()
-    if (game:GetService("Workspace").FlowerZones[kometa.vars.field].Position - api.humanoidrootpart().Position).magnitude < temptable.magnitude then
-        local Sprinkler = rtsg().EquippedSprinkler
-        local Amount = 1
-        if Sprinkler == "Basic Sprinkler" or Sprinkler == "The Supreme Saturator" then
-            Amount = 1
-        elseif Sprinkler == "Silver Soakers" then
-            Amount = 2
-        elseif Sprinkler == "Golden Gushers" then
-            Amount = 3
-        elseif Sprinkler == "Diamond Drenchers" then
-            Amount = 4
-        end
-        local FieldSelected = game:GetService("Workspace").FlowerZones[kometa.vars.field]
-        local FieldEdge1 = FieldSelected.Position + Vector3.new((FieldSelected.Size.X / 2) - 24, 0, (FieldSelected.Size.Z / 2) - 24)
-        local FieldEdge2 = FieldSelected.Position - Vector3.new((FieldSelected.Size.X / 2) - 24, 0, (FieldSelected.Size.Z / 2) - 24)
-        local FieldBounds = {
-            [1] = Vector3.new(FieldEdge1.X - FieldEdge1.X % 0.000000000000001, FieldSelected.Position.Y, FieldSelected.Position.Z),
-            [2] = Vector3.new(FieldSelected.Position.X, FieldSelected.Position.Y, FieldEdge1.Z - FieldEdge1.Z % 0.000000000000001),
-            [3] = Vector3.new(FieldEdge2.X - FieldEdge2.X % 0.000000000000001, FieldSelected.Position.Y, FieldSelected.Position.Z),
-            [4] = Vector3.new(FieldSelected.Position.X, FieldSelected.Position.Y, FieldEdge2.Z - FieldEdge2.Z % 0.000000000000001),
-        }
-        local JumpPower = api.humanoid().JumpPower
-        for Index = 1, Amount do
-            if not kometa.toggles.autofarm then
-                break
-            end
-            api.humanoid().JumpPower = 70
-            if Amount == 1 then
-                api.teleport(CFrame.new(FieldSelected.Position))
-                task.wait(.1)
-                api.humanoid().Jump = true
-            elseif Amount ~= 2 then
-                api.teleport(CFrame.new(FieldBounds[Index]))
-                task.wait(.1)
-                api.humanoid().Jump = true
-            else
-                if Index == 1 then
-                    api.teleport(CFrame.new(FieldBounds[1]))
-                    task.wait(.1)
-                    api.humanoid().Jump = true
+                pcall(function() self2.modal.Modal = toggled end)
+
+                if toggled then
+					pcall(self2.container.TweenPosition, self2.container, savedposition, "Out", "Sine", 0.5, true)
                 else
-                    api.teleport(CFrame.new(FieldBounds[3]))
-                    task.wait(.1)
-                    api.humanoid().Jump = true
-                end
-            end
-            task.wait(0.2)
-            game.ReplicatedStorage.Events.PlayerActivesCommand:FireServer({["Name"] = "Sprinkler Builder"})
-            api.humanoid().JumpPower = JumpPower
-            task.wait(1.3)
-        end
-    else
-        sprinkler = rtsg().EquippedSprinkler
-        e = 1
-        if sprinkler == "Basic Sprinkler" or sprinkler == "The Supreme Saturator" then
-            e = 1
-        elseif sprinkler == "Silver Soakers" then
-            e = 2
-        elseif sprinkler == "Golden Gushers" then
-            e = 3
-        elseif sprinkler == "Diamond Drenchers" then
-            e = 4
-        end
-        for i = 1, e do
-            k = api.humanoid().JumpPower
-            if e ~= 1 then api.humanoid().JumpPower = 70 api.humanoid().Jump = true task.wait(.2) end
-            game.ReplicatedStorage.Events.PlayerActivesCommand:FireServer({["Name"] = "Sprinkler Builder"})
-            if e ~= 1 then api.humanoid().JumpPower = k task.wait(1) end
-        end
-    end
-end
+                    savedposition = self2.container.Position;
+					pcall(self2.container.TweenPosition, self2.container, UDim2.new(savedposition.Width.Scale, savedposition.Width.Offset, 1.5, 0), "Out", "Sine", 0.5, true)
+				end
+			end
+		end)
+	end
+	
+	self2.ChangeBackgroundImage = function(ImageID, Transparency)
+		self2.container.Image = ImageID
+		
+		if Transparency then
+			self2.container.ImageTransparency = Transparency
+		else
+			self2.container.ImageTransparency = 0.8
+		end
+	end
 
-function killmobs()
-    for i,v in pairs(game:GetService("Workspace").MonsterSpawners:GetChildren()) do
-        if v:FindFirstChild("Territory") then
-            if v.Name ~= "Commando Chick" and v.Name ~= "CoconutCrab" and v.Name ~= "StumpSnail" and v.Name ~= "TunnelBear" and v.Name ~= "King Beetle Cave" and not v.Name:match("CaveMonster") and not v:FindFirstChild("TimerLabel", true).Visible then
-                if v.Name:match("Werewolf") then
-                    monsterpart = game:GetService("Workspace").Territories.WerewolfPlateau.w
-                elseif v.Name:match("Mushroom") then
-                    monsterpart = game:GetService("Workspace").Territories.MushroomZone.Part
-                else
-                    monsterpart = v.Territory.Value
-                end
-                api.humanoidrootpart().CFrame = monsterpart.CFrame
-                repeat api.humanoidrootpart().CFrame = monsterpart.CFrame avoidmob() task.wait(1) until v:FindFirstChild("TimerLabel", true).Visible or api.humanoid().Health == 0
-                for i = 1, 4 do gettoken(monsterpart.Position) end
-            end
-        end
-    end
-end
+	kometaData.UpConnection = kometa.gs["UserInputService"].InputEnded:Connect(function(Input)
+		if Input.KeyCode == kometaData.ToggleKey and not typing then
+			toggled = not toggled
 
-function IsToken(token)
-    if not token then
-        return false
-    end
-    if not token.Parent then return false end
-    if token then
-        if kometa.toggles.farmballoons and findclosestballoon() then
-            if (findclosestballoon().BalloonRoot.Position - api.humanoidrootpart().Position).magnitude >= 30 then
-                return false
-            end
-        end
-        if token.Orientation.Z ~= 0 and token.Name == "C" then
-            return false
-        end
-        if token.Name == "C" then
-            if token:FindFirstChild("FrontDecal") then
-            else
-                return false
-            end
-        end
-        if not token.Name == "C" and not token.Name == "Bubble" then
-            return false
-        end
-        if not token:IsA("Part") then
-            return false
-        end
-        return true
-    else
-        return false
-    end
-end
+			if toggled then
+				self2.container:TweenPosition(UDim2.new(0.5, 0, 0.5, 0), "Out", "Sine", 0.5, true)
+			else
+				self2.container:TweenPosition(UDim2.new(0.5, 0, 1.5, 0), "Out", "Sine", 0.5, true)
+			end
+		end
+	end)
 
-function check(ok)
-    if not ok then
-        return false
-    end
-    if not ok.Parent then return false end
-    return true
-end
+	self2.userinterface = self:Create("ScreenGui", {
+		Name = cachename,
+		ZIndexBehavior = Enum.ZIndexBehavior.Global,
+		ResetOnSpawn = false,
+	})
 
-function findvalue(table, value)
-    for i,v in pairs(table) do
-        for e,r in pairs(v) do
-            if r == value then
-                return i
-            end
-        end
-    end
-end
-
-function getplanters()
-    for i,v in pairs(debug.getupvalues(require(game:GetService("ReplicatedStorage").LocalPlanters).LoadPlanter)[4]) do 
-        if v.IsMine then
-            if planterst[v.Type][1] == nil then
-                planterst[v.Type] = {v.Type, v.ActorID, v.Puffshroom, v.GrowthPercent, v.Pos}
-            end
-        end
-    end
-end
-
-function findclosestballoon()
-    local root = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
-    if root == nil then return end
-    local studs = math.huge
-    local part;
-    for _, obj in next, game:GetService("Workspace").Balloons.FieldBalloons:GetChildren() do
-        if obj:FindFirstChild("BalloonRoot") and obj:FindFirstChild("PlayerName") then
-            if obj:FindFirstChild("PlayerName").Value == game.Players.LocalPlayer.Name then
-                local distance = (root.Position - obj.BalloonRoot.Position).Magnitude
-                if distance < studs then
-                    studs = distance
-                    part = obj
-                end
-            end
-        end
-    end
-    return part
-end
-
-function findballoon()
-    for _, obj in next, game:GetService("Workspace").Balloons.FieldBalloons:GetChildren() do
-        if obj:FindFirstChild("BalloonRoot") and obj:FindFirstChild("PlayerName") then
-            if obj:FindFirstChild("PlayerName").Value == game.Players.LocalPlayer.Name then
-                part = obj
-                break
-            end
-        end
-    end
-    return part
-end
-
-function findclosestflame()
-    local root = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
-    if root == nil then return end
-    local studs = math.huge
-    local part;
-    for _, obj in next, game:GetService("Workspace").PlayerFlames:GetChildren() do
-        local distance = (root.Position - obj.Position).Magnitude
-        if distance < studs then
-            studs = distance
-            part = obj
-        end
-    end
-    return part
-end
-
-function farmant()
-    antpart.CanCollide = true
-    temptable.started.ant = true
-    anttable = {left = true, right = false}
-    temptable.oldtool = rtsg()['EquippedCollector']
-    game.ReplicatedStorage.Events.ItemPackageEvent:InvokeServer("Equip",{["Mute"] = true,["Type"] = "Spark Staff",["Category"] = "Collector"})
-    game.ReplicatedStorage.Events.ToyEvent:FireServer("Ant Challenge")
-    kometa.toggles.autodig = true
-    acl = CFrame.new(127, 48, 547)
-    acr = CFrame.new(65, 48, 534)
-    task.wait(1)
-    game.ReplicatedStorage.Events.PlayerActivesCommand:FireServer({["Name"] = "Sprinkler Builder"})
-    api.humanoidrootpart().CFrame = api.humanoidrootpart().CFrame + Vector3.new(0, 15, 0)
-    task.wait(3)
-    repeat
-        task.wait()
-        for i,v in next, game.Workspace.Toys["Ant Challenge"].Obstacles:GetChildren() do
-            if v:FindFirstChild("Root") then
-                if (v.Root.Position-api.humanoidrootpart().Position).magnitude <= 40 and anttable.left then
-                    api.humanoidrootpart().CFrame = acr
-                    anttable.left = false anttable.right = true
-                    wait(.1)
-                elseif (v.Root.Position-api.humanoidrootpart().Position).magnitude <= 40 and anttable.right then
-                    api.humanoidrootpart().CFrame = acl
-                    anttable.left = true anttable.right = false
-                    wait(.1)
-                end
-            end
-        end
-    until game:GetService("Workspace").Toys["Ant Challenge"].Busy.Value == false
-    task.wait(1)
-    game.ReplicatedStorage.Events.ItemPackageEvent:InvokeServer("Equip",{["Mute"] = true,["Type"] = temptable.oldtool,["Category"] = "Collector"})
-    temptable.started.ant = false
-    antpart.CanCollide = false
-    temptable.stats.farmedants = temptable.stats.farmedants + 1
-end
-
-function collectplanters()
-    getplanters()
-    -- for i,v in pairs(planterst) do
-    --     for e,r in pairs(kometa.planterssettings) do
-    --         if r.Type == i then
-    --             if r.enabled then
-    --                 if v[1] == nil then continue end
-    --                 if v[1] ~= r.Type then continue end
-    --                 if r.growth <= v[4] then
-    --                     if v[3] and r.safepuffs then
-    --                         continue
-    --                     end
-    --                     api.teleport(CFrame.new(v[5]))
-    --                     game:GetService("ReplicatedStorage").Events.PlanterModelCollect:FireServer(v[2])
-    --                     task.wait(2)
-    --                     -- game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer({["Name"] = v.." Planter"})
-    --                     for i = 1, 5 do gettoken(CFrame.new(v[5]).Position) end
-    --                     task.wait(2)
-    --                     planterst[v[1]] = {}
-    --                 end
-    --             end
-    --         end
-    --     end
-    -- end
-    for i,v in pairs(planterst) do
-        if v[1] == nil then continue end
-        planterToCollect = nil
-        if kometa.planterssettings[1].Type == v[1] then 
-            planterToCollect = kometa.planterssettings[1]
-        elseif kometa.planterssettings[2].Type == v[1] then 
-            planterToCollect = kometa.planterssettings[2]
-        elseif kometa.planterssettings[3].Type == v[1] then 
-            planterToCollect = kometa.planterssettings[3]
-        end
-        if planterToCollect == nil then continue end
-        if planterToCollect.enabled then
-            if planterToCollect.growth < v[4] + 0.01 then
-                if v[3] and planterToCollect.safepuffs then
-                    continue
-                end
-                api.teleport(CFrame.new(v[5]))
-                game:GetService("ReplicatedStorage").Events.PlanterModelCollect:FireServer(v[2])
-                task.wait(2)
-                -- game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer({["Name"] = v.." Planter"})
-                for i = 1, 5 do gettoken(CFrame.new(v[5]).Position) end
-                task.wait(2)
-                planterst[v[1]] = {}
-            end
-        end
-    end
-end
-
-function plantplanters()
-    -- getplanters()
-    -- for i,v in pairs(kometa.planterssettings) do
-    --     if v.enabled then
-    --         if planterst[i] then
-    --             continue
-    --         end
-    --         api.teleport(game:GetService("Workspace").FlowerZones:FindFirstChild(v.field).CFrame)
-    --         task.wait(2)
-    --         game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer({["Name"] = v.type.." Planter"})
-    --         task.wait(1)
-    --     end
-    -- end
-    for i,v in pairs(kometa.planterssettings) do
-        if v.enabled then
-            if planterst[v.Type][1] ~= nil then continue end
-            -- if planterst[v.Type][1] == v.Type then continue end
-            api.teleport(game:GetService("Workspace").FlowerZones:FindFirstChild(v.field).CFrame)
-            task.wait(2)
-            game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer({["Name"] = v.Type.." Planter"})
-            task.wait(1)
-        end
-        -- if kometa.planterssettings[i].enabled then
-        --     if v ~= nil then continue end
-        --     api.teleport(game:GetService("Workspace").FlowerZones:FindFirstChild(v.field).CFrame)
-        --     task.wait(2)
-        --     game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer({["Name"] = kometa.planterssettings[i].Type.." Planter"})
-        --     task.wait(1)
-        -- end
-    end
-end
-
-function getprioritytokens(v3)
-    if not v3 then
-        v3 = fieldposition
-    end
-    task.wait()
-    if kometa.toggles.bloatfarm and temptable.foundpopstar then return end
-    for e,r in next, game:GetService("Workspace").Collectibles:GetChildren() do
-        if r:FindFirstChildOfClass("Decal") and api.findvalue(kometa.priority, string.split(r:FindFirstChildOfClass("Decal").Texture, 'rbxassetid://')[2]) then
-            if tonumber((r.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) <= temptable.magnitude/1.2 and (v3-r.Position).magnitude <= temptable.magnitude then
-                farm(r)
-            end
-        end
-    end
-end
-
-function gethiveballoon()
-    task.wait()
-    result = false
-    for i,hive in next, game:GetService("Workspace").Honeycombs:GetChildren() do
-        task.wait()
-        if hive:FindFirstChild("Owner") and hive:FindFirstChild("SpawnPos") then
-            if tostring(hive.Owner.Value) == game.Players.LocalPlayer.Name then
-                for e,balloon in next, game:GetService("Workspace").Balloons.HiveBalloons:GetChildren() do
-                    task.wait()
-                    if balloon:FindFirstChild("BalloonRoot") then
-                        if (balloon.BalloonRoot.Position-hive.SpawnPos.Value.Position).magnitude < 15 then
-                            result = true
-                            break
-                        end
-                    end
-                end
-            end
-        end
-    end
-    return result
-end
-
-function converthoney()
-    task.wait(0)
-    if temptable.converting then
-        if game.Players.LocalPlayer.PlayerGui.ScreenGui.ActivateButton.TextBox.Text ~= "Stop Making Honey" and game.Players.LocalPlayer.PlayerGui.ScreenGui.ActivateButton.BackgroundColor3 ~= Color3.new(201, 39, 28) or (game:GetService("Players").LocalPlayer.SpawnPos.Value.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > 10 then
-            api.tween(1, game:GetService("Players").LocalPlayer.SpawnPos.Value * CFrame.fromEulerAnglesXYZ(0, 110, 0) + Vector3.new(0, 0, 9))
-            task.wait(.9)
-            if game.Players.LocalPlayer.PlayerGui.ScreenGui.ActivateButton.TextBox.Text ~= "Stop Making Honey" and game.Players.LocalPlayer.PlayerGui.ScreenGui.ActivateButton.BackgroundColor3 ~= Color3.new(201, 39, 28) or (game:GetService("Players").LocalPlayer.SpawnPos.Value.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > 10 then game:GetService("ReplicatedStorage").Events.PlayerHiveCommand:FireServer("ToggleHoneyMaking") end
-            task.wait(.1)
-        end
-    end
-end
-
-function closestleaf()
-    for i,v in next, game.Workspace.Flowers:GetChildren() do
-        if temptable.running == false and tonumber((v.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude/1.4 then
-            farmold(v)
-            break
-        end
-    end
-end
-
-function getbubble()
-    for i,v in next, game.workspace.Particles:GetChildren() do
-        if string.find(v.Name, "Bubble") and temptable.running == false and tonumber((v.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude/1.4 then
-            if temptable.foundpopstar and kometa.toggles.bloatfarm then
-                farm(v, true)
-            else
-                farm(v)
-            end
-            break
-        end
-    end
-end
-
-function getballoons()
-    for i,v in next, game:GetService("Workspace").Balloons.FieldBalloons:GetChildren() do
-        if v:FindFirstChild("BalloonRoot") and v:FindFirstChild("PlayerName") then
-            if v:FindFirstChild("PlayerName").Value == game.Players.LocalPlayer.Name then
-                if tonumber((v.BalloonRoot.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude/1.4 then
-                    api.walkTo(v.BalloonRoot.Position)
-                end
-            end
-        end
-    end
-end
-
-function getflower()
-    flowerrrr = flowertable[math.random(#flowertable)]
-    if tonumber((flowerrrr-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) <= temptable.magnitude/1.4 and tonumber((flowerrrr-fieldposition).magnitude) <= temptable.magnitude/1.4 then 
-        if temptable.running == false then 
-            -- if kometa.toggles.loopfarmspeed then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = kometa.vars.farmspeed end
-            api.humanoid().WalkSpeed = math.random(30, 70)
-            api.walkTo(flowerrrr) 
-        end 
-    end
-end
-
-function getcloud()
-    for i,v in next, game:GetService("Workspace").Clouds:GetChildren() do
-        e = v:FindFirstChild("Plane")
-        if e and tonumber((e.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude/1.4 then
-            api.walkTo(e.Position)
-        end
-    end
-end
-
-function getcoco(v)
-    if temptable.coconut then repeat task.wait() until not temptable.coconut end
-    temptable.coconut = true
-    -- api.tween(.1, v.CFrame)
-    -- repeat task.wait() api.walkTo(v.Position) until not v.Parent
-    -- task.wait(.1)
-    repeat
-        task.wait()
-            temptable.float = true
-        api.tweenNoDelay(0.1, v.CFrame)
-    until not v.Parent
-    if temptable.float then temptable.float = false end
-    temptable.coconut = false
-    table.remove(temptable.coconuts, table.find(temptable.coconuts, v))
-end
-
-function getfuzzy(v)
-    if temptable.fuzzy then repeat task.wait() until not temptable.fuzzy end
-    if not v:FindFirstChild("Plane") then return end
-    local FuzzyPlane = v:FindFirstChild("Plane")
-    temptable.fuzzy = true
-    repeat
-        task.wait()
-        api.tweenNoDelay(0.1, CFrame.new(FuzzyPlane.Position.X, FuzzyPlane.Position.Y+3, FuzzyPlane.Position.Z))
-    until not v.Parent or not FuzzyPlane or not v
-    temptable.fuzzy = false
-    table.remove(temptable.FuzzyBombs, table.find(temptable.FuzzyBombs, v))
-end
-
-function getflame()
-    for i,v in next, game:GetService("Workspace").PlayerFlames:GetChildren() do
-        if tonumber((v.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude/1.4 and not rtsg().Modifiers.FlameHeat then
-            if kometa.toggles.faceballoons and findballoon() then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findballoon().BalloonRoot.Position.X, api.humanoidrootpart().Position.Y, findballoon().BalloonRoot.Position.Z)) end
-            if kometa.toggles.faceflames and findclosestflame() then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findclosestflame().Position.X, api.humanoidrootpart().Position.Y, findclosestflame().Position.Z)) end
-            -- if kometa.toggles.loopfarmspeed then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = kometa.vars.farmspeed end
-            api.humanoid().WalkSpeed = math.random(30, 70)
-            repeat 
-                api.humanoid().AutoRotate = false
-                api.humanoid():MoveTo(v.Position) 
-                task.wait()
-            until rtsg().ModifierCaches.Value.FlameHeat['_'] == 1 or not v or not v.Parent
-            api.humanoid().AutoRotate = true
-            break
-        end
-    end
-end
-
-function avoidmob()
-    for i,v in next, game:GetService("Workspace").Monsters:GetChildren() do
-        if v:FindFirstChild("Head") then
-            if (v.Head.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude < 40 and api.humanoid():GetState() ~= Enum.HumanoidStateType.Freefall then
-                game.Players.LocalPlayer.Character.Humanoid.Jump = true
-            end
-        end
-    end
-end
-
-function getcrosshairs(v)
-    if v.BrickColor ~= BrickColor.new("Lime green") and v.BrickColor ~= BrickColor.new("Flint") then
-    if temptable.crosshair then repeat task.wait() until not temptable.crosshair end
-    temptable.crosshair = true
-    -- api.walkTo(v.Position)
-    repeat 
-        task.wait() 
-        api.walkTo(v.Position)
-    until not v.Parent or v.BrickColor == BrickColor.new("Forest green") or v.BrickColor == BrickColor.new("Royal purple")
-    task.wait(.1)
-    temptable.crosshair = false
-    table.remove(temptable.crosshairs, table.find(temptable.crosshairs, v))
-    else
-        table.remove(temptable.crosshairs, table.find(temptable.crosshairs, v))
-    end
-end
-
-function makequests()
-    pcall(function()
-    for i,v in next, game:GetService("Workspace").NPCs:GetChildren() do
-        if v.Name ~= "Ant Challenge Info" and v.Name ~= "Bubble Bee Man 2" and v.Name ~= "Wind Shrine" and v.Name ~= "Gummy Bear" then if v:FindFirstChild("Platform") then if v.Platform:FindFirstChild("AlertPos") then if v.Platform.AlertPos:FindFirstChild("AlertGui") then if v.Platform.AlertPos.AlertGui:FindFirstChild("ImageLabel") then
-            image = v.Platform.AlertPos.AlertGui.ImageLabel
-            button = game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.ActivateButton.MouseButton1Click
-            if image.ImageTransparency == 0 then
-                if kometa.toggles.tptonpc then
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Platform.Position.X, v.Platform.Position.Y+3, v.Platform.Position.Z)
-                    task.wait(1)
-                else
-                    api.tween(2,CFrame.new(v.Platform.Position.X, v.Platform.Position.Y+3, v.Platform.Position.Z))
-                    task.wait(3)
-                end
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Platform.Position.X, v.Platform.Position.Y+3, v.Platform.Position.Z)
-                task.wait(.1)
-                for b,z in next, getconnections(button) do    z.Function()    end
-                task.wait(8)
-                if image.ImageTransparency == 0 then
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Platform.Position.X, v.Platform.Position.Y+3, v.Platform.Position.Z)
-                    task.wait(.1)
-                    for b,z in next, getconnections(button) do    z.Function()    end
-                end
-                task.wait(2)
-            end
-        end     
-    end end end end end end)
-end
-
-local ui = library.new(true, "kometa ☄️ | "..temptable.version, _G.size or UDim2.new(0, 550, 0, 350))
-ui.ChangeToggleKey(Enum.KeyCode.Semicolon)
-
-local hometab = ui:Category("Home")
-local farmtab = ui:Category("Farming")
-local planterstab = ui:Category("Planters")
-local combtab = ui:Category("Combat")
-local statstab = ui:Category("Statistics")
-local wayptab = ui:Category("Waypoints")
-local hivetab = ui:Category("Hive")
-local misctab = ui:Category("Misc")
-local extrtab = ui:Category("Extra")
-local setttab = ui:Category("Settings")
-
-local main = hometab:Sector("Main")
-main:Cheat("Label", "Thanks you for using our script!")
-main:Cheat("Label", "Another official fork of kocmoc by notweuz")
-main:Cheat("Label", "Script by mrdevl, .anon, cryptozen and notweuz")
-main:Cheat("Label", "Script version: "..temptable.version)
---information:Cheat("Button", "Discord Invite", function() setclipboard("https://discord.gg/2a5gVpcpzv") end)
---information:Cheat("Button", "Donation", function() setclipboard("https://qiwi.com/n/W33UZ") end)
-local signs = hometab:Sector("Signs")
-signs:Cheat("Label", "⚠️ - Not Safe Function")
-signs:Cheat("Label", "⚙ - Configurable Function")
-signs:Cheat("Label", "⏳ - Update Function Preview")
-local links = hometab:Sector("Links")
-links:Cheat("Button", "Discord Server", function() setclipboard("https://discord.gg/2a5gVpcpzv") end, {text=""})
-links:Cheat("Button", "Token IDs", function() setclipboard("https://pastebin.com/raw/wtHBD3ij") end, {text=""})
-
-local farm = farmtab:Sector("Farming")
-farm:Cheat("Dropdown", "Field", function(Option) temptable.tokensfarm = false kometa.vars.field = Option end, {options=fieldstable})
-farm:Cheat("Slider", "Convert at:", function(Value) kometa.vars.convertat = Value end, {min = 0, max = 100, suffix = "%"})
-farm:Cheat("Checkbox", "Autofarm", function(State) kometa.toggles.autofarm = not kometa.toggles.autofarm end)
-farm:Cheat("Checkbox", "Auto Sprinkler ⏳", function(State) kometa.toggles.autosprinkler = State end)
-farm:Cheat("Checkbox", "Autodig", function(State) kometa.toggles.autodig = State end)
-farm:Cheat("Checkbox", "Collector Steal For Autodig", function(State) kometa.toggles.collectorsteal = State end)
-farm:Cheat("Checkbox", "Farm Bubbles", function(State) kometa.toggles.farmbubbles = State end)
-farm:Cheat("Checkbox", "Bubble Bloat Helper", function(State) kometa.toggles.bloatfarm = State end)
-farm:Cheat("Checkbox", "Farm Flames", function(State) kometa.toggles.farmflame = State end)
-farm:Cheat("Checkbox", "Farm Coconuts & Shower", function(State) kometa.toggles.farmcoco = State end)
-farm:Cheat("Checkbox", "Farm Precise Crosshairs", function(State) kometa.toggles.collectcrosshairs = State end)
-farm:Cheat("Checkbox", "Farm Fuzzy Bombs", function(State) kometa.toggles.farmfuzzy = State end)
-farm:Cheat("Checkbox", "Farm Under Balloons", function(State) kometa.toggles.farmballoons = State end)
-farm:Cheat("Checkbox", "Farm Under Clouds", function(State) kometa.toggles.farmclouds = State end)
-local farmsecond = farmtab:Sector("Farming")
-farmsecond:Cheat("Checkbox", "Auto Dispenser ⚙", function(State) kometa.toggles.autodispense = State end)
-farmsecond:Cheat("Checkbox", "Auto Field Boosters ⚙", function(State) kometa.toggles.autoboosters = State end)
-farmsecond:Cheat("Checkbox", "Auto Wealth Clock", function(State) kometa.toggles.clock = State end)
-farmsecond:Cheat("Checkbox", "Auto Free Antpasses", function(State) kometa.toggles.freeantpass = State end)
-farmsecond:Cheat("Checkbox", "Auto Special Sprout Summoner", function(State) kometa.toggles.autospawnsprout = State end)
-farmsecond:Cheat("Checkbox", "Auto Honeystorm", function(State) kometa.toggles.honeystorm = State end)
--- farmsecond:Cheat("Checkbox", "Auto Gingerbread Bears", function(State) kometa.toggles.collectgingerbreads = State end)
--- farmsecond:Cheat("Checkbox", "Auto Samovar", function(State) kometa.toggles.autosamovar = State end)
--- farmsecond:Cheat("Checkbox", "Auto Stockings", function(State) kometa.toggles.autostockings = State end)
--- farmsecond:Cheat("Checkbox", "Auto Honey Candles", function(State) kometa.toggles.autocandles = State end)
--- farmsecond:Cheat("Checkbox", "Auto Beesmas Feast", function(State) kometa.toggles.autofeast = State end)
--- farmsecond:Cheat("Checkbox", "Auto Onett's Lid Art", function(State) kometa.toggles.autoonettart = State end)
--- farmsecond:Cheat("Checkbox", "Use Instant Converters", function(State) kometa.toggles.instantconverters = State end)
--- farmsecond:Cheat("Checkbox", "Farm Snowflakes ⚠️", function(State) kometa.toggles.farmsnowflakes = State end)
-farmsecond:Cheat("Checkbox", "Farm Sprouts", function(State) kometa.toggles.farmsprouts = State end)
-farmsecond:Cheat("Checkbox", "Farm Puffshrooms", function(State) kometa.toggles.farmpuffshrooms = State end)
-farmsecond:Cheat("Checkbox", "Farm Tickets ⚠️", function(State) kometa.toggles.farmtickets = State end)
-farmsecond:Cheat("Checkbox", "Teleport To Rares ⚠️", function(State) kometa.toggles.farmrares = State end)
-farmsecond:Cheat("Checkbox", "Auto Accept/Confirm Quests ⚙", function(State) kometa.toggles.autoquest = State end)
-farmsecond:Cheat("Checkbox", "Auto Do Quests ⚙", function(State) kometa.toggles.autodoquest = State end)
-farmsecond:Cheat("Checkbox", "Face Flames", function(State) kometa.toggles.faceflames = State end)
-farmsecond:Cheat("Checkbox", "Face Balloons", function(State) kometa.toggles.faceballoons = State end)
-
-local psec1 = planterstab:Sector("First Planter")
-psec1:Cheat("Dropdown", "Planter", function(Option) kometa.planterssettings[1].Type = Option end, {options=require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER})
-psec1:Cheat("Dropdown", "Field", function(Option) kometa.planterssettings[1].field = Option end, {options=fieldstable})
-psec1:Cheat("Slider", "Growth Percent", function(Value) kometa.planterssettings[1].growth = tonumber(Value)/100 or 1 end, {min = 0, max = 100, suffix = "%"})
-psec1:Cheat("Checkbox", "Auto Plant", function(State) kometa.planterssettings[1].enabled = State end)
-psec1:Cheat("Checkbox", "Ignore If Puffshrooms", function(State) kometa.planterssettings[1].safepuffs = State end)
-
-local psec2 = planterstab:Sector("Second Planter")
-psec2:Cheat("Dropdown", "Planter", function(Option) kometa.planterssettings[2].Type = Option end, {options=require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER})
-psec2:Cheat("Dropdown", "Field", function(Option) kometa.planterssettings[2].field = Option end, {options=fieldstable})
-psec2:Cheat("Slider", "Growth Percent", function(Value) kometa.planterssettings[2].growth = tonumber(Value)/100 or 1 end, {min = 0, max = 100, suffix = "%"})
-psec2:Cheat("Checkbox", "Auto Plant", function(State) kometa.planterssettings[2].enabled = State end)
-psec2:Cheat("Checkbox", "Ignore If Puffshrooms", function(State) kometa.planterssettings[2].safepuffs = State end)
-
-local psec3 = planterstab:Sector("Third Planter")
-psec3:Cheat("Dropdown", "Planter", function(Option) kometa.planterssettings[3].Type = Option end, {options=require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER})
-psec3:Cheat("Dropdown", "Field", function(Option) kometa.planterssettings[3].field = Option end, {options=fieldstable})
-psec3:Cheat("Slider", "Growth Percent", function(Value) kometa.planterssettings[3].growth = tonumber(Value)/100 or 1 end, {min = 0, max = 100, suffix = "%"})
-psec3:Cheat("Checkbox", "Auto Plant", function(State) kometa.planterssettings[3].enabled = State end)
-psec3:Cheat("Checkbox", "Ignore If Puffshrooms", function(State) kometa.planterssettings[3].safepuffs = State end)
-psec3:Cheat("Label", "") psec3:Cheat("Label", "") psec3:Cheat("Label", "") 
-
-local mobkill = combtab:Sector("Combat")
-mobkill:Cheat("Checkbox", "Train Crab", function(State) if State then api.humanoidrootpart().CFrame = CFrame.new(-307.52117919922, 107.91863250732, 467.86791992188) end end)
-mobkill:Cheat("Checkbox", "Train Snail", function(State) fd = game.Workspace.FlowerZones['Stump Field'] if State then api.humanoidrootpart().CFrame = CFrame.new(fd.Position.X, fd.Position.Y-6, fd.Position.Z) else api.humanoidrootpart().CFrame = CFrame.new(fd.Position.X, fd.Position.Y+2, fd.Position.Z) end end)
-mobkill:Cheat("Checkbox", "Kill Mondo", function(State) kometa.toggles.killmondo = State end)
-mobkill:Cheat("Checkbox", "Kill Vicious", function(State) kometa.toggles.killvicious = State end)
-mobkill:Cheat("Checkbox", "Kill Windy", function(State) kometa.toggles.killwindy = State end)
-mobkill:Cheat("Checkbox", "Auto Kill Mobs", function(State) kometa.toggles.autokillmobs = State end)
-mobkill:Cheat("Checkbox", "Avoid Mobs", function(State) kometa.toggles.avoidmobs = State end)
-mobkill:Cheat("Checkbox", "Auto Ant", function(State) kometa.toggles.autoant = State end)
-
-local amks = combtab:Sector("Auto Kill Mobs Settings")
-amks:Cheat("Textbox",'Kill Mobs After x Convertions', function(Value) kometa.vars.monstertimer = tonumber(Value) end, { placeholder = 'default = 3'})
-
-local statssector = statstab:Sector("Statistics")
-statssector:Cheat("Label", "Gained Honey")
-statssector:Cheat("Label", "Elapsed Time")
-statssector:Cheat("Label", "Farmed Sprouts")
-statssector:Cheat("Label", "Killed Vicious")
-statssector:Cheat("Label", "Killed Windy")
-statssector:Cheat("Label", "Farmed Ants")
-
-local mobstimers = statstab:Sector("Mob Timers")
-mobstimers:Cheat("Label", "Coming soon!")
-
-local wayp = wayptab:Sector("Waypoints")
-wayp:Cheat("Dropdown", "Field Teleports", function(Option) game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").FlowerZones:FindFirstChild(Option).CFrame end, {options = fieldstable})
-wayp:Cheat("Dropdown", "Monster Teleports", function(Option) d = game:GetService("Workspace").MonsterSpawners:FindFirstChild(Option) game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(d.Position.X, d.Position.Y+3, d.Position.Z) end, {options = spawnerstable})
-wayp:Cheat("Dropdown", "Toys Teleports", function(Option) d = game:GetService("Workspace").Toys:FindFirstChild(Option).Platform game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(d.Position.X, d.Position.Y+3, d.Position.Z) end, {options = toystable})
-wayp:Cheat("Button", "Teleport to hive", function() game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Players").LocalPlayer.SpawnPos.Value end, {placeholder = ' '})
-
-local ghive = hivetab:Sector("Hive Position && Food Type")
-ghive:Cheat("Textbox", "X", function(Value) kometa.beessettings.general.x = Value end, {placeholder = ' '})
-ghive:Cheat("Textbox", "Y", function(Value) kometa.beessettings.general.y = Value end, {placeholder = ' '})
-ghive:Cheat("Textbox", "Amount", function(Value) kometa.beessettings.general.amount = tonumber(Value) or 1 end, {placeholder = ' '})
-ghive:Cheat("Dropdown", "Food Type", function(Option) kometa.beessettings.foodtype = Option end, { options = {"Treat", "SunflowerSeed", "Blueberry", "Strawberry", "Bitterberry", "Pineapple"--[[,"GingerbreadBear"]]}})
-local arjhive = hivetab:Sector("Auto Royal Jelly")
-arjhive:Cheat("Dropdown", "Bee", function(Value) kometa.beessettings.usb = Value end, {options = beestable})
-arjhive:Cheat("Checkbox", "Until Selected Bee", function(State) kometa.beessettings.usbtoggle = State if not State then game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.BeePopUp.TypeName.Text = "" end end)
-local ugbhive = hivetab:Sector("Autofeed")
-ugbhive:Cheat("Checkbox", "Food Until Gifted", function(State) kometa.beessettings.ugb = State if not State then game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.BeePopUp.TypeName.Text = "" end end)
-ugbhive:Cheat("Checkbox", "Auto Feed", function(State) kometa.beessettings.af = State end)
-local feedhive = hivetab:Sector("Manual Feeding")
-feedhive:Cheat("Button", "Feed Selected Bee", function()
-    temptable.feed(kometa.beessettings.general.x, kometa.beessettings.general.y, kometa.beessettings.foodtype, kometa.beessettings.general.amount)
-end, {text = 'Feed'})
-feedhive:Cheat("Button", "Feed All Bees", function()
-    for xbee = 1, 5, 1 do
-        for ybee = 1, 10, 1 do
-            temptable.feed(xbee, ybee, kometa.beessettings.foodtype, kometa.beessettings.general.amount)
-        end
-    end
-end, {text = 'Feed'})
-local umhive = hivetab:Sector("Mutation Rolling")
-umhive:Cheat("Dropdown", "Mutation", function(Option) kometa.beessettings.mutation = Option end, {options = {"Convert Amount", "Gather Amount", "Ability Rate", "Attack", "Energy"}})
-umhive:Cheat("Checkbox", "Roll Until Mutation", function(State) kometa.beessettings.umb = State if not State then game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.BeePopUp.MutationFrame.MutationLabel.Text.Text = "" end end)
-
-local miscc = misctab:Sector("Misc")
-miscc:Cheat("Button", "Ant Challenge Semi-Godmode", function() api.tween(1, CFrame.new(93.4228, 32.3983, 553.128)) task.wait(1) game.ReplicatedStorage.Events.ToyEvent:FireServer("Ant Challenge") game.Players.LocalPlayer.Character.HumanoidRootPart.Position = Vector3.new(93.4228, 42.3983, 553.128) task.wait(2) game.Players.LocalPlayer.Character.Humanoid.Name = 1 local l = game.Players.LocalPlayer.Character["1"]:Clone() l.Parent = game.Players.LocalPlayer.Character l.Name = "Humanoid" task.wait() game.Players.LocalPlayer.Character["1"]:Destroy() api.tween(1, CFrame.new(93.4228, 32.3983, 553.128)) task.wait(8) api.tween(1, CFrame.new(93.4228, 32.3983, 553.128)) end, {text = ''})
-miscc:Cheat("Checkbox", "Walk Speed", function(State) kometa.toggles.loopspeed = State end)
-miscc:Cheat("Checkbox", "Jump Power", function(State) kometa.toggles.loopjump = State end)
-miscc:Cheat("Checkbox", "Godmode", function(State) kometa.toggles.godmode = State if State then bssapi:Godmode(true) else bssapi:Godmode(false) end end)
-miscc:Cheat("Checkbox", "Always Visual Night", function(State) kometa.toggles.visualnight = State end)
-
-local webhooking = misctab:Sector("Discord Webhooking")
-webhooking:Cheat("Textbox", "Webhook", function(Value) kometawebhook.webhook = Value end, {placeholder = ' '})
-webhooking:Cheat("Button", "Remind Webhook", function() api.notify('kometa', 'Your webhook is '..kometawebhook.webhook) end, {text = ''})
-webhooking:Cheat("Checkbox", "Send After Converting", function(State) kometa.webhooking.convert = State end)
-webhooking:Cheat("Checkbox", "Send On Vicious", function(State) kometa.webhooking.vicious = State end)
-webhooking:Cheat("Checkbox", "Send On Windy", function(State) kometa.webhooking.windy = State end)
-webhooking:Cheat("Checkbox", "Send When Player Joins Server", function(State) kometa.webhooking.playeradded = State end)
-
-local misco = misctab:Sector("Other")
-misco:Cheat("Dropdown", "Equip Accesories", function(Option) local ohString1 = "Equip" local ohTable2 = { ["Mute"] = false, ["Type"] = Option, ["Category"] = "Accessory" } game:GetService("ReplicatedStorage").Events.ItemPackageEvent:InvokeServer(ohString1, ohTable2) end, {options = accesoriestable})
-misco:Cheat("Dropdown", "Equip Masks", function(Option) local ohString1 = "Equip" local ohTable2 = { ["Mute"] = false, ["Type"] = Option, ["Category"] = "Accessory" } game:GetService("ReplicatedStorage").Events.ItemPackageEvent:InvokeServer(ohString1, ohTable2) end, {options = masktable})
-misco:Cheat("Dropdown", "Equip Collectors", function(Option) local ohString1 = "Equip" local ohTable2 = { ["Mute"] = false, ["Type"] = Option, ["Category"] = "Collector" } game:GetService("ReplicatedStorage").Events.ItemPackageEvent:InvokeServer(ohString1, ohTable2) end, {options = collectorstable})
-misco:Cheat("Dropdown", "Generate Amulet", function(Option) local A_1 = Option.." Generator" local Event = game:GetService("ReplicatedStorage").Events.ToyEvent Event:FireServer(A_1) end, {options = {"Supreme Star Amulet", "Diamond Star Amulet", "Gold Star Amulet","Silver Star Amulet","Bronze Star Amulet","Moon Amulet"}})
-misco:Cheat("Button", "Export Stats Table", function() local StatCache = require(game.ReplicatedStorage.ClientStatCache)writefile("Stats_"..api.nickname..".json", StatCache:Encode()) end, {text = ''})
-misco:Cheat("Textbox", "Ping Spoofer", function(Option) settings():GetService("NetworkSettings").IncomingReplicationLag = tonumber(Option)/1000 or 0 end, {placeholder = 'Add ms to ping'})
-misco:Cheat("Label", "") misco:Cheat("Label", "") misco:Cheat("Label", "") misco:Cheat("Label", "") misco:Cheat("Label", "") 
-
-local extras = extrtab:Sector("Extras")
-extras:Cheat("Textbox", "Glider Speed", function(Value) local StatCache = require(game.ReplicatedStorage.ClientStatCache) local stats = StatCache:Get() stats.EquippedParachute = "Glider" local module = require(game:GetService("ReplicatedStorage").Parachutes) local st = module.GetStat local glidersTable = getupvalues(st) glidersTable[1]["Glider"].Speed = Value setupvalue(st, st[1]'Glider', glidersTable) end)
-extras:Cheat("Textbox", "Glider Float", function(Value) local StatCache = require(game.ReplicatedStorage.ClientStatCache) local stats = StatCache:Get() stats.EquippedParachute = "Glider" local module = require(game:GetService("ReplicatedStorage").Parachutes) local st = module.GetStat local glidersTable = getupvalues(st) glidersTable[1]["Glider"].Float = Value setupvalue(st, st[1]'Glider', glidersTable) end)
-extras:Cheat("Button", "Invisibility", function(State) api.teleport(CFrame.new(0,0,0)) wait(1) if game.Players.LocalPlayer.Character:FindFirstChild('LowerTorso') then Root = game.Players.LocalPlayer.Character.LowerTorso.Root:Clone() game.Players.LocalPlayer.Character.LowerTorso.Root:Destroy() Root.Parent = game.Players.LocalPlayer.Character.LowerTorso api.teleport(game:GetService("Players").LocalPlayer.SpawnPos.Value) end end, {text = ''})
-extras:Cheat("Checkbox", "Float", function(State) temptable.float = State end)
-
-local optimize = extrtab:Sector("Optimization")
-optimize:Cheat("Button", "Hide nickname", function() loadstring(game:HttpGet("https://s.kometa.ga/other/nicknamespoofer.lua"))()end, {text = ''})
-optimize:Cheat("Button", "Boost FPS", function()loadstring(game:HttpGet("https://s.kometa.ga/other/fpsboost.lua"))()end, {text = ''})
-optimize:Cheat("Button", "Destroy Decals", function()loadstring(game:HttpGet("https://s.kometa.ga/other/destroydecals.lua"))()end, {text = ''})
-optimize:Cheat("Checkbox", "Disable 3D Render On Unfocus", function(State) kometa.toggles.disablerender = State end)
-optimize:Cheat("Checkbox", "Disable 3D Render", function(State) game:GetService("RunService"):Set3dRenderingEnabled(not State) end)
-
-local windsh = extrtab:Sector("Wind Shrine")
-windsh:Cheat("Dropdown", "Item", function(Option) kometa.vars.donatit[1] = Option end, {options=temptable.item_names}) 
-windsh:Cheat("Textbox", "Count", function(Value) kometa.vars.donatit[2] = tonumber(Value) end)
-windsh:Cheat("Checkbox", "Auto Donate", function(State) kometa.toggles.autodonate = State end)
-windsh:Cheat("Checkbox", "Don't Spawn Drop On Donate", function(State) kometa.toggles.donotdonatedrop = State end)
-windsh:Cheat("Button", "Donate", function()
-    game.ReplicatedStorage.Events.WindShrineDonation:InvokeServer(kometa.vars.donatit[1], kometa.vars.donatit[2])
-    if not kometa.toggles.donotdonatedrop then game.ReplicatedStorage.Events.WindShrineTrigger:FireServer() end
-end, {text = 'Once'})
-windsh:Cheat("Button", "Spawn Drop", function()
-    game.ReplicatedStorage.Events.WindShrineTrigger:FireServer()
-end, {text = 'Spawn'})
-windsh:Cheat("Label", "") windsh:Cheat("Label", "") windsh:Cheat("Label", "")
-
-local farmsettings = setttab:Sector("Autofarm Settings")
--- farmsettings:Cheat("Textbox", "Autofarming Walkspeed", function(Value) kometa.vars.farmspeed = Value end, {placeholder = "Default Value = 60"})
--- farmsettings:Cheat("Checkbox", "^ Loop Speed On Autofarming", function(State) kometa.toggles.loopfarmspeed = State end)
-farmsettings:Cheat("Checkbox", "Don't Walk In Field", function(State) kometa.toggles.farmflower = State end)
-farmsettings:Cheat("Checkbox", "Convert Hive Balloon", function(State) kometa.toggles.convertballoons = State end)
-farmsettings:Cheat("Checkbox", "Don't Farm Tokens", function(State) kometa.toggles.donotfarmtokens = State end)
-farmsettings:Cheat("Checkbox", "Enable Token Blacklisting", function(State) kometa.toggles.enabletokenblacklisting = State end)
-farmsettings:Cheat("Slider", "Walk Speed", function(Value) kometa.vars.walkspeed = Value end, {min = 0, max = 120, suffix = " studs"})
-farmsettings:Cheat("Slider", "Jump Power", function(Value) kometa.vars.jumppower = Value end, {min = 0, max = 120, suffix = " studs"})
-local raresettings = setttab:Sector("Tokens Settings")
-raresettings:Cheat("Textbox", "Asset ID", function(Value) rarename = Value end, {placeholder = 'rbxassetid'})
-raresettings:Cheat("Button", "Add Rare", function()
-    table.insert(kometa.rares, rarename)
-    game.CoreGui.kometaUI.Container.Categories.Settings.L["Tokens Settings"].Container["Rares List"]:Destroy()
-    raresettings:Cheat("Dropdown", "Rares List", function(Option)
-    end, {
-        options = kometa.rares
+	self2.container = self:Create("ImageLabel", {
+		Draggable = true,
+		Active = true,
+		Name = "Container",
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundTransparency = 0,
+		BackgroundColor3 = theme.main_container,
+		BorderSizePixel = 0,
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		Size = UDim2.new(0, 900, 0, 350),
+		ZIndex = 2,
+		ImageTransparency = 1
     })
-end, {text = 'Add'})
-raresettings:Cheat("Button", "Remove Rare", function()
-    table.remove(kometa.rares, api.tablefind(kometa.rares, rarename))
-    game.CoreGui.kometaUI.Container.Categories.Settings.L["Tokens Settings"].Container["Rares List"]:Destroy()
-    raresettings:Cheat("Dropdown", "Rares List", function(Option)
-    end, {
-        options = kometa.rares
-    })
-end, {text = 'Remove'})
-raresettings:Cheat("Button", "Add To Blacklist", function()
-    table.insert(kometa.bltokens, rarename)
-    game.CoreGui.kometaUI.Container.Categories.Settings.L["Tokens Settings"].Container["Tokens Blacklist"]:Destroy()
-    raresettings:Cheat("Dropdown", "Tokens Blacklist", function(Option)
-    end, {
-        options = kometa.bltokens
-    })
-end, {text = 'Add'})
-raresettings:Cheat("Button", "Remove From Blacklist", function()
-    table.remove(kometa.bltokens, api.tablefind(kometa.bltokens, rarename))
-    game.CoreGui.kometaUI.Container.Categories.Settings.L["Tokens Settings"].Container["Tokens Blacklist"]:Destroy()
-    raresettings:Cheat("Dropdown", "Tokens Blacklist", function(Option)
-    end, {
-        options = kometa.bltokens
-    })
-end, {text = 'Remove'})
-raresettings:Cheat("Dropdown", "Tokens Blacklist", function(Option) end, {options = kometa.bltokens})
-raresettings:Cheat("Dropdown", "Rares List", function(Option) end, {options = kometa.rares})
-local dispsettings = setttab:Sector("Auto Dispenser & Auto Boosters Settings")
-dispsettings:Cheat("Checkbox", "Royal Jelly Dispenser", function(State) kometa.dispensesettings.rj = not kometa.dispensesettings.rj end)
-dispsettings:Cheat("Checkbox", "Blueberry Dispenser",  function(State) kometa.dispensesettings.blub = not kometa.dispensesettings.blub end)
-dispsettings:Cheat("Checkbox", "Strawberry Dispenser",  function(State) kometa.dispensesettings.straw = not kometa.dispensesettings.straw end)
-dispsettings:Cheat("Checkbox", "Treat Dispenser",  function(State) kometa.dispensesettings.treat = not kometa.dispensesettings.treat end)
-dispsettings:Cheat("Checkbox", "Coconut Dispenser",  function(State) kometa.dispensesettings.coconut = not kometa.dispensesettings.coconut end)
-dispsettings:Cheat("Checkbox", "Glue Dispenser",  function(State) kometa.dispensesettings.glue = not kometa.dispensesettings.glue end)
-dispsettings:Cheat("Checkbox", "Mountain Top Booster",  function(State) kometa.dispensesettings.white = not kometa.dispensesettings.white end)
-dispsettings:Cheat("Checkbox", "Blue Field Booster",  function(State) kometa.dispensesettings.blue = not kometa.dispensesettings.blue end)
-dispsettings:Cheat("Checkbox", "Red Field Booster",  function(State) kometa.dispensesettings.red = not kometa.dispensesettings.red end)
-local guisettings = setttab:Sector("GUI Settings")
-guisettings:Cheat("Keybind", "Set toggle button", function(Value) ui.ChangeToggleKey(Value) end, {text = 'Set New'})
-guisettings:Cheat("Dropdown", "GUI Options (Dropdown)", function(Option) if Option == "Color Reset" then game:GetService("CoreGui").kometaUI.Container.BackgroundColor3 = Color3.fromRGB(32,32,33) else game.CoreGui.kometaUI:Destroy() temptable.tokensfarm = false end end, { options = { "Destroy GUI", "Color Reset" } })
--- guisettings:Cheat("Checkbox", "Disable Separators", function(State)
---     if Settings.disableseperators == false then
---         Settings.disableseperators = true
---         for i,v in pairs(game:GetService("CoreGui").kometaUI.Container:GetChildren()) do
---             if v.Name == "Separator" then
---                 v.Visible = false
---             end
---             task.wait()
---         end
---     else
---         for i,v in pairs(game:GetService("CoreGui").kometaUI.Container:GetChildren()) do
---             if v.Name == "Separator" then
---                 v.Visible = true
---             end
---             task.wait()
---         end
---         Settings.disableseperators = false
---     end
--- end)
-guisettings:Cheat("Checkbox", "RGB GUI", function(State)
-    if kometa.toggles.rgbui == false then
-        kometa.toggles.rgbui = true
-            while kometa.toggles.rgbui do
-                for hue = 0, 255, 4 do
-                    if kometa.toggles.rgbui then
-                        game.CoreGui.kometaUI.Container.BorderColor3 = Color3.fromHSV(hue/256, 1, 1)
-                        game.CoreGui.kometaUI.Container.BackgroundColor3 = Color3.fromHSV(hue/256, .5, .8)
-                        task.wait()
-                    end
-                end
-            end
-        else
-        end
-        kometa.toggles.rgbui = false
-end)
-guisettings:Cheat("ColorPicker", "GUI Color", function(Value) game:GetService("CoreGui").kometaUI.Container.BackgroundColor3 = Value end)
-guisettings:Cheat("Textbox", "GUI Transparency", function(Value)game:GetService("CoreGui").kometaUI.Container.BackgroundTransparency = Value for i,v in pairs(game:GetService("CoreGui").kometaUI.Container:GetChildren()) do    if v.Name == "Separator" then    v.BackgroundTransparency = Value end end	game:GetService("CoreGui").kometaUI.Container.Shadow.ImageTransparency = Value end, { placeholder = "between 0 and 1"})
-local komets = setttab:Sector("Configs")
-komets:Cheat("Textbox", "Config Name", function(Value) temptable.configname = Value end, {placeholder = 'ex: stumpconfig'})
-komets:Cheat("Button", "Load Config", function() kometa = game:service'HttpService':JSONDecode(readfile("kometa/BSS_"..temptable.configname..".json")) kometawebhook = game:service'HttpService':JSONDecode(readfile("kometa/BSS_webhook_"..temptable.configname..".json")) end, {text = ' '})
-komets:Cheat("Button", "Save Config", function() writefile("kometa/BSS_"..temptable.configname..".json",game:service'HttpService':JSONEncode(kometa)) writefile("kometa/BSS_webhook_"..temptable.configname..".json",game:service'HttpService':JSONEncode(kometawebhook)) end, {text = ' '})
-komets:Cheat("Button", "Reset Config", function() kometa = defaultkometa kometawebhook = defaultkometawebhook end, {text = ' '})
-local fieldsettings = setttab:Sector("Fields Settings")
-fieldsettings:Cheat("Dropdown", "Best White Field", function(Option) kometa.bestfields.white = Option end, {options = temptable.whitefields})
-fieldsettings:Cheat("Dropdown", "Best Red Field", function(Option) kometa.bestfields.red = Option end, {options = temptable.redfields})
-fieldsettings:Cheat("Dropdown", "Best Blue Field", function(Option) kometa.bestfields.blue = Option end, {options = temptable.bluefields})
-fieldsettings:Cheat("Dropdown", "Field", function(Option) temptable.blackfield = Option end, {options = fieldstable})
-fieldsettings:Cheat("Button", "Add Field To Blacklist", function() table.insert(kometa.blacklistedfields, temptable.blackfield) game:GetService("CoreGui").kometaUI.Container.Categories.Settings.L["Fields Settings"].Container["Blacklisted Fields"]:Destroy() fieldsettings:Cheat("Dropdown", "Blacklisted Fields", function(Option) end, {options = kometa.blacklistedfields}) end, {text = ' '})
-fieldsettings:Cheat("Button", "Remove Field From Blacklist", function() table.remove(kometa.blacklistedfields, api.tablefind(kometa.blacklistedfields, temptable.blackfield)) game:GetService("CoreGui").kometaUI.Container.Categories.Settings.L["Fields Settings"].Container["Blacklisted Fields"]:Destroy() fieldsettings:Cheat("Dropdown", "Blacklisted Fields", function(Option) end, {options = kometa.blacklistedfields}) end, {text = ' '})
-fieldsettings:Cheat("Dropdown", "Blacklisted Fields", function(Option) end, {options = kometa.blacklistedfields})
-local aqs = setttab:Sector("Auto Quest Settings")
-aqs:Cheat("Dropdown", "Do NPC Quests", function(Option) kometa.vars.npcprefer = Option end, {options = {'All Quests', 'Bucko Bee', 'Brown Bear', 'Riley Bee', 'Polar Bear'}})
-aqs:Cheat("Checkbox", "Teleport To NPC", function(State) kometa.toggles.tptonpc = State end)
-local pts = setttab:Sector("Autofarm Priority Tokens")
-pts:Cheat("Textbox", "Asset ID", function(Value) rarename = Value end, {placeholder = 'rbxassetid'})
-pts:Cheat("Button", "Add Token To Priority List", function() table.insert(kometa.priority, rarename) game:GetService("CoreGui").kometaUI.Container.Categories.Settings.L["Autofarm Priority Tokens"].Container["Priority List"]:Destroy() pts:Cheat("Dropdown", "Priority List", function(Option) end, {options = kometa.priority}) end, {text = ''})
-pts:Cheat("Button", "Remove Token From Priority List", function() table.remove(kometa.priority, api.tablefind(kometa.priority, rarename)) game:GetService("CoreGui").kometaUI.Container.Categories.Settings.L["Autofarm Priority Tokens"].Container["Priority List"]:Destroy() pts:Cheat("Dropdown", "Priority List", function(Option) end, {options = kometa.priority}) end, {text = ''})
-pts:Cheat("Dropdown", "Priority List", function(Option) end, {options = kometa.priority})
+    
+    self2.modal = self:Create("TextButton", {
+        Text = "";
+        Transparency = 1;
+        Modal = true;
+    }) self2.modal.Parent = self2.userinterface;
+	
+	if thinProject and typeof(thinProject) == "UDim2" then
+		self2.container.Size = thinProject
+	end
 
-task.spawn(function() while task.wait() do
-    if kometa.toggles.autofarm then
-        --if kometa.toggles.farmcoco then getcoco() end
-        --if kometa.toggles.collectcrosshairs then getcrosshairs() end
-        if kometa.toggles.farmflame then getflame() end
-        -- if kometa.toggles.farmfuzzy then getfuzzy() end
-    end
-end end)
+	self2.container.Draggable = true
+	self2.container.Active = true
 
-game.Workspace.Particles.ChildAdded:Connect(function(v)
-    if not temptable.started.vicious and not temptable.started.ant then
-        if v.Name == "WarningDisk" and not temptable.started.vicious and kometa.toggles.autofarm and not temptable.started.ant and kometa.toggles.farmcoco and (v.Position-api.humanoidrootpart().Position).magnitude < temptable.magnitude and not temptable.converting then
-            table.insert(temptable.coconuts, v)
-            getcoco(v)
-            gettoken()
-        elseif v.Name == "Crosshair" then
-            task.wait(.2)
-            if v ~= nil and v.BrickColor ~= BrickColor.new("Forest green") and not temptable.started.ant and v.BrickColor ~= BrickColor.new("Flint") and (v.Position-api.humanoidrootpart().Position).magnitude < temptable.magnitude and kometa.toggles.autofarm and kometa.toggles.collectcrosshairs and not temptable.converting then
-                if #temptable.crosshairs <= 3 then
-                    table.insert(temptable.crosshairs, v)
-                    getcrosshairs(v)
-                    gettoken()
-                end
-            end
-        elseif v.Name == "DustBunnyInstance" then
-            task.wait(.1)
-            if v:FindFirstChild("Plane") then
-                if kometa.toggles.farmfuzzy and kometa.toggles.autofarm and tonumber((v.Plane.Position-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude/1.4 then
-                    -- repeat api.teleport(CFrame.new(v:FindFirstChild("Plane").Position)) task.wait() until v ~= nil or v.Parent ~= nil
-                    table.insert(temptable.FuzzyBombs, v)
-                    getfuzzy(v)
-                end
-            end
-        end
-    end
-end)
+	self2.sidebar = self:Create("Frame", {
+		Name = "Sidebar",
+		BackgroundColor3 = Color3.new(0.976471, 0.937255, 1),
+		BackgroundTransparency = 1,
+		BorderColor3 = Color3.new(0.745098, 0.713726, 0.760784),
+		Size = UDim2.new(0, 120, 1, -30),
+		Position = UDim2.new(0, 0, 0, 30),
+		ZIndex = 2,
+	})
 
-task.spawn(function() while task.wait() do
-    if temptable.collecting.tickets then continue end
-    if temptable.collecting.rares then continue end
-    if kometa.toggles.autofarm then
-        temptable.magnitude = 70
-        if game.Players.LocalPlayer.Character:FindFirstChild("ProgressLabel",true) then
-        local pollenprglbl = game.Players.LocalPlayer.Character:FindFirstChild("ProgressLabel",true)
-        maxpollen = tonumber(pollenprglbl.Text:match("%d+$"))
-        local pollencount = game.Players.LocalPlayer.CoreStats.Pollen.Value
-        pollenpercentage = pollencount/maxpollen*100
-        fieldselected = game:GetService("Workspace").FlowerZones[kometa.vars.field]
-        if kometa.toggles.autodoquest then
-            if game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Menus.Children.Quests.Content:FindFirstChild("Frame") then
-                for i,v in next, game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Menus.Children.Quests:GetDescendants() do
-                    if v.Name == "Description" then
-                        if string.match(v.Parent.Parent.TitleBar.Text, kometa.vars.npcprefer) or kometa.vars.npcprefer == "All Quests" and not string.find(v.Text, "Puffshroom") then
-                            pollentypes = {'White Pollen', "Red Pollen", "Blue Pollen", "Blue Flowers", "Red Flowers", "White Flowers"}
-                            text = v.Text
-                            if api.returnvalue(fieldstable, text) and not string.find(v.Text, "Complete!") and not api.findvalue(kometa.blacklistedfields, api.returnvalue(fieldstable, text)) then
-                                d = api.returnvalue(fieldstable, text)
-                                fieldselected = game:GetService("Workspace").FlowerZones[d]
-                                break
-                            elseif api.returnvalue(pollentypes, text) and not string.find(v.Text, 'Complete!') then
-                                d = api.returnvalue(pollentypes, text)
-                                if d == "Blue Flowers" or d == "Blue Pollen" then
-                                    fieldselected = game:GetService("Workspace").FlowerZones[kometa.bestfields.blue]
-                                    break
-                                elseif d == "White Flowers" or d == "White Pollen" then
-                                    fieldselected = game:GetService("Workspace").FlowerZones[kometa.bestfields.white]
-                                    break
-                                elseif d == "Red Flowers" or d == "Red Pollen" then
-                                    fieldselected = game:GetService("Workspace").FlowerZones[kometa.bestfields.red]
-                                    break
-                                end
-                            end
-                        end
-                    end
-                end
-            else
-                api.notify('kometa | Auto Quest Error', 'You have autoquest enabled, but quests tab is closed. Please open it.')
-            end
-        else
-            fieldselected = game:GetService("Workspace").FlowerZones[kometa.vars.field]
-        end
-        fieldpos = CFrame.new(fieldselected.Position.X, fieldselected.Position.Y+3, fieldselected.Position.Z)
-        fieldposition = fieldselected.Position
-        if temptable.sprouts.detected and temptable.sprouts.coords and kometa.toggles.farmsprouts then
-            fieldposition = temptable.sprouts.coords.Position
-            fieldpos = temptable.sprouts.coords
-        end
-        if kometa.toggles.farmpuffshrooms and game.Workspace.Happenings.Puffshrooms:FindFirstChildOfClass("Model") then 
-            if api.partwithnamepart("Mythic", game.Workspace.Happenings.Puffshrooms) then
-                temptable.magnitude = 25 
-                fieldpos = api.partwithnamepart("Mythic", game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
-                fieldposition = fieldpos.Position
-            elseif api.partwithnamepart("Legendary", game.Workspace.Happenings.Puffshrooms) then
-                temptable.magnitude = 25 
-                fieldpos = api.partwithnamepart("Legendary", game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
-                fieldposition = fieldpos.Position
-            elseif api.partwithnamepart("Epic", game.Workspace.Happenings.Puffshrooms) then
-                temptable.magnitude = 25 
-                fieldpos = api.partwithnamepart("Epic", game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
-                fieldposition = fieldpos.Position
-            elseif api.partwithnamepart("Rare", game.Workspace.Happenings.Puffshrooms) then
-                temptable.magnitude = 25 
-                fieldpos = api.partwithnamepart("Rare", game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
-                fieldposition = fieldpos.Position
-            else
-                temptable.magnitude = 25 
-                fieldpos = api.getbiggestmodel(game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
-                fieldposition = fieldpos.Position
-            end
-        end
-        if tonumber(pollenpercentage) < tonumber(kometa.vars.convertat) then
-            if not temptable.tokensfarm then
-                api.tween(1, fieldpos)
-                temptable.tokensfarm = true
-                if kometa.toggles.autosprinkler then makesprinklers() end
-            else
-                if kometa.toggles.killmondo then
-                    while kometa.toggles.killmondo and game.Workspace.Monsters:FindFirstChild("Mondo Chick (Lvl 8)") and not temptable.started.vicious and not temptable.started.monsters do
-                        temptable.started.mondo = true
-                        while game.Workspace.Monsters:FindFirstChild("Mondo Chick (Lvl 8)") do
-                            disableall()
-                            game:GetService("Workspace").Map.Ground.HighBlock.CanCollide = false 
-                            mondopition = game.Workspace.Monsters["Mondo Chick (Lvl 8)"].Head.Position
-                            api.tween(1, CFrame.new(mondopition.x, mondopition.y - 60, mondopition.z))
-                            task.wait(1)
-                            temptable.float = true
-                        end
-                        task.wait(.5) game:GetService("Workspace").Map.Ground.HighBlock.CanCollide = true temptable.float = false api.tween(.5, CFrame.new(73.2, 176.35, -167)) task.wait(1)
-                        for i = 0, 50 do 
-                            gettoken(CFrame.new(73.2, 176.35, -167).Position) 
-                        end 
-                        enableall() 
-                        api.tween(2, fieldpos) 
-                        temptable.started.mondo = false
-                    end
-                end
-                if (fieldposition-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > temptable.magnitude then
-                    api.teleport(fieldpos)
-                    if kometa.toggles.autosprinkler then makesprinklers() end
-                end
-                getprioritytokens()
-                if kometa.toggles.avoidmobs then avoidmob() end
-                if kometa.toggles.farmclosestleaf then closestleaf() end
-                if kometa.toggles.farmbubbles then getbubble() end
-                if kometa.toggles.farmclouds then getcloud() end
-                --if kometa.toggles.farmballoons then getballoons() end
-                if not kometa.toggles.donotfarmtokens and done then getlinktoken() gettoken() end
-                if not kometa.toggles.farmflower then getflower() end
-            end
-        elseif tonumber(pollenpercentage) >= tonumber(kometa.vars.convertat) then
-            temptable.tokensfarm = false
-            api.tween(1, game:GetService("Players").LocalPlayer.SpawnPos.Value * CFrame.fromEulerAnglesXYZ(0, 110, 0) + Vector3.new(0, 0, 9))
-            temptable.converting = true
-            repeat
-                converthoney()
-            until game.Players.LocalPlayer.CoreStats.Pollen.Value == 0
-            if kometa.toggles.convertballoons and gethiveballoon() then
-                task.wait(6)
-                repeat
-                    task.wait()
-                    converthoney()
-                until gethiveballoon() == false or not kometa.toggles.convertballoons
-            end
-            temptable.converting = false
-            temptable.act = temptable.act + 1
-            if kometa.webhooking.convert then api.imagehook(kometawebhook.webhook, "Total Honey: `"..game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.MeterHUD.HoneyMeter.Bar.TextLabel.Text.."`\nGained Honey: `"..api.suffixstring(temptable.honeycurrent - temptable.honeystart).."`\nElapsed Time: `"..api.toHMS(temptable.stats.runningfor).."`", "kometa ☄️", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/f/f6/HoneyDrop.png/revision/latest/scale-to-width-down/90?cb=20200521143648&path-prefix=ru") end
-            task.wait(6)
-            if kometa.toggles.autoant and not game:GetService("Workspace").Toys["Ant Challenge"].Busy.Value and rtsg().Eggs.AntPass > 0 then farmant() end
-            if kometa.toggles.autoquest then makequests() end
-            collectplanters()
-            plantplanters()
-            if kometa.toggles.autokillmobs then 
-                if temptable.act >= kometa.vars.monstertimer then
-                    temptable.started.monsters = true
-                    temptable.act = 0
-                    killmobs() 
-                    temptable.started.monsters = false
-                end
-            end
-        end
-    end
-end end end)
+	self2.categories = self:Create("Frame", {
+		Name = "Categories",
+		BackgroundColor3 = Color3.new(0.976471, 0.937255, 1),
+		ClipsDescendants = true,
+		BackgroundTransparency = 1,
+		BorderColor3 = Color3.new(0.745098, 0.713726, 0.760784),
+		Size = UDim2.new(1, -120, 1, -30),
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, 0, 0, 30),
+		ZIndex = 2,
+	})
+	self2.categories.ClipsDescendants = true
 
-task.spawn(function()
-    while task.wait(1) do
-		if kometa.toggles.killvicious and temptable.detected.vicious and temptable.converting == false and not temptable.started.monsters then
-            temptable.started.vicious = true
-            disableall()
-			local vichumanoid = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
-			for i,v in next, game.workspace.Particles:GetChildren() do
-				for x in string.gmatch(v.Name, "Vicious") do
-					if string.find(v.Name, "Vicious") then
-						api.tween(1,CFrame.new(v.Position.x, v.Position.y, v.Position.z)) task.wait(1)
-						api.tween(0.5, CFrame.new(v.Position.x, v.Position.y, v.Position.z)) task.wait(.5)
+	self2.topbar = self:Create("Frame", {
+		Name = "Topbar",
+		ZIndex = 2,
+		Size = UDim2.new(1,0,0,30),
+		BackgroundTransparency = 2
+	})
+
+	self2.tip = self:Create("TextLabel", {
+		Name = "TopbarTip",
+		ZIndex = 2,
+		Size = UDim2.new(1, -30, 0, 30),
+		Position = UDim2.new(0, 30, 0, 0),
+		Text = "Press '".. string.sub(tostring(self.ToggleKey), 14) .."' to hide this menu",
+		Font = Enum.Font.GothamSemibold,
+		TextSize = 13,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		BackgroundTransparency = 1,
+		TextColor3 = theme.text_color,
+	})
+	
+	if projectName then
+		self2.tip.Text = projectName
+	else
+		self2.tip.Text = "Press '".. string.sub(tostring(self.ToggleKey), 14) .."' to hide this menu"
+	end
+	
+	local separator = self:Create("Frame", {
+		Name = "Separator",
+		BackgroundColor3 = theme.separator_color,
+		BorderSizePixel = 0,
+		Position = UDim2.new(0, 118, 0, 30),
+		Size = UDim2.new(0, 1, 1, -30),
+		ZIndex = 6,
+	})
+	separator.Parent = self2.container
+	separator = nil
+
+	local separator = self:Create("Frame", {
+		Name = "Separator",
+		BackgroundColor3 = theme.separator_color,
+		BorderSizePixel = 0,
+		Position = UDim2.new(0, 0, 0, 30),
+		Size = UDim2.new(1, 0, 0, 1),
+		ZIndex = 6,
+	})
+	separator.Parent = self2.container
+	separator = nil
+
+	local uipagelayout = self:Create("UIPageLayout", {
+		Padding = UDim.new(0, 10),
+		FillDirection = Enum.FillDirection.Vertical,
+		TweenTime = 0.7,
+		EasingStyle = Enum.EasingStyle.Quad,
+		EasingDirection = Enum.EasingDirection.InOut,
+		SortOrder = Enum.SortOrder.LayoutOrder,
+	})
+	uipagelayout.Parent = self2.categories
+	uipagelayout = nil
+
+	local uipadding = self:Create("UIPadding", {
+		PaddingTop = UDim.new(0, 3),
+		PaddingLeft = UDim.new(0, 2)
+	})
+	uipadding.Parent = self2.sidebar
+	uipadding = nil
+
+	local uilistlayout = self:Create("UIListLayout", {
+		SortOrder = Enum.SortOrder.LayoutOrder
+	})
+	uilistlayout.Parent = self2.sidebar
+	uilistlayout = nil
+
+	function self2:Category(name)
+		local category = {}
+		
+		category.button = kometa:Create("TextButton", {
+			Name = name,
+			BackgroundColor3 = theme.category_button_background,
+			BackgroundTransparency = 1,
+			BorderMode = Enum.BorderMode.Inset,
+			BorderColor3 = theme.category_button_border,
+			Size = UDim2.new(1, -4, 0, 25),
+			ZIndex = 2,
+			AutoButtonColor = false,
+			Font = Enum.Font.GothamSemibold,
+			Text = name,
+			TextColor3 = theme.text_color,
+			TextSize = 14
+		})
+
+		category.container = kometa:Create("ScrollingFrame", {
+			Name = name,
+			BackgroundTransparency = 1,
+			ScrollBarThickness = 4,
+			BorderSizePixel = 0,
+			Size = UDim2.new(1, 0, 1, 0),
+			ZIndex = 2,
+			CanvasSize = UDim2.new(0, 0, 0, 0),
+			ScrollBarImageColor3 = theme.scrollbar_color or Color3.fromRGB(118, 118, 121),
+			BottomImage = "rbxassetid://967852042",
+			MidImage = "rbxassetid://967852042",
+			TopImage = "rbxassetid://967852042",
+			ScrollBarImageTransparency = 1 --
+		})
+
+		category.hider = kometa:Create("Frame", {
+			Name = "Hider",
+			BackgroundTransparency = 0, --
+			BorderSizePixel = 0,
+			BackgroundColor3 = theme.main_container,
+			Size = UDim2.new(1, 0, 1, 0),
+			ZIndex = 5
+		})
+
+		category.L = kometa:Create("Frame", {
+			Name = "L",
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			Position = UDim2.new(0, 10, 0, 3),
+			Size = UDim2.new(0.5, -20, 1, -3),
+			ZIndex = 2
+		})
+		
+		if not thinProject then
+			category.R = kometa:Create("Frame", {
+				Name = "R",
+				AnchorPoint = Vector2.new(1, 0),
+				BackgroundColor3 = Color3.new(1, 1, 1),
+				BackgroundTransparency = 1,
+				Position = UDim2.new(1, -10, 0, 3),
+				Size = UDim2.new(0.5, -20, 1, -3),
+				ZIndex = 2
+			})
+		end
+		
+		if thinProject then
+			category.L.Size = UDim2.new(1, -20, 1, -3)
+		end
+		
+		if firstCategory then
+			kometa.gs["TweenService"]:Create(category.hider, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+			kometa.gs["TweenService"]:Create(category.container, TweenInfo.new(0.3), {ScrollBarImageTransparency = 0}):Play()
+		end
+		
+		do
+			local uilistlayout = kometa:Create("UIListLayout", {
+				SortOrder = Enum.SortOrder.LayoutOrder
+			})
+	
+			local uilistlayout2 = kometa:Create("UIListLayout", {
+				SortOrder = Enum.SortOrder.LayoutOrder
+			})
+			
+			local function computeSizeChange()
+				local largestListSize = 0
+				
+				largestListSize = uilistlayout.AbsoluteContentSize.Y
+				
+				if uilistlayout2.AbsoluteContentSize.Y > largestListSize then
+					largestListSize = largestListSize
+				end
+				
+				category.container.CanvasSize = UDim2.new(0, 0, 0, largestListSize + 5)
+			end
+			
+			uilistlayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(computeSizeChange)
+			uilistlayout2:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(computeSizeChange)
+			
+			uilistlayout.Parent = category.L
+			uilistlayout2.Parent = category.R
+		end
+		
+		category.button.MouseEnter:Connect(function()
+			kometa.gs["TweenService"]:Create(category.button, TweenInfo.new(0.2), {BackgroundTransparency = 0.5}):Play()
+		end)
+		category.button.MouseLeave:Connect(function()
+			kometa.gs["TweenService"]:Create(category.button, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
+		end)
+		category.button.MouseButton1Down:Connect(function()
+			for _, categoryf in next, self2.userinterface["Container"]["Categories"]:GetChildren() do
+				if categoryf:IsA("ScrollingFrame") then
+					if categoryf ~= category.container then
+						kometa.gs["TweenService"]:Create(categoryf.Hider, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+						kometa.gs["TweenService"]:Create(categoryf, TweenInfo.new(0.3), {ScrollBarImageTransparency = 1}):Play()
 					end
 				end
 			end
-			for i,v in next, game.workspace.Particles:GetChildren() do
-				for x in string.gmatch(v.Name, "Vicious") do
-                    while kometa.toggles.killvicious and temptable.detected.vicious do task.wait() if string.find(v.Name, "Vicious") then
-                        for i=1, 4 do temptable.float = true vichumanoid.CFrame = CFrame.new(v.Position.x+10, v.Position.y, v.Position.z) task.wait(.3)
-                        end
-                    end end
-                end
-			end
-            enableall()
-			task.wait(1)
-			temptable.float = false
-            temptable.started.vicious = false
-            temptable.stats.killedvicious = temptable.stats.killedvicious + 1
+
+			kometa.gs["TweenService"]:Create(category.button, TweenInfo.new(0.2), {BackgroundTransparency = 0.2}):Play()
+			kometa.gs["TweenService"]:Create(category.hider, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+			kometa.gs["TweenService"]:Create(category.container, TweenInfo.new(0.3), {ScrollBarImageTransparency = 0}):Play()
+
+			self2.categories["UIPageLayout"]:JumpTo(category.container)
+		end)
+		category.button.MouseButton1Up:Connect(function()
+			kometa.gs["TweenService"]:Create(category.button, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
+		end)
+
+		category.container.Parent = self2.categories
+		category.button.Parent = self2.sidebar
+		
+		if not thinProject then
+			category.R.Parent = category.container
 		end
-	end
-end)
+		
+		category.L.Parent = category.container
+		category.hider.Parent = category.container
 
-task.spawn(function() while task.wait() do
-    if kometa.toggles.killwindy and temptable.detected.windy and not temptable.converting and not temptable.started.vicious and not temptable.started.mondo and not temptable.started.monsters then
-        temptable.started.windy = true
-        wlvl = "" aw = false awb = false -- some variable for autowindy, yk?
-        disableall()
-        while kometa.toggles.killwindy and temptable.detected.windy do
-            if not aw then
-                for i,v in pairs(workspace.Monsters:GetChildren()) do
-                    if string.find(v.Name, "Windy") then wlvl = v.Name aw = true -- we found windy!
-                    end
-                end
-            end
-            if aw then
-                for i,v in pairs(workspace.Monsters:GetChildren()) do
-                    if string.find(v.Name, "Windy") then
-                        if v.Name ~= wlvl then
-                            temptable.float = false task.wait(5) for i =1, 5 do gettoken(api.humanoidrootpart().Position) end -- collect tokens :yessir:
-                            wlvl = v.Name
+		local function calculateSector()
+			if thinProject then
+				return "L"
+			end
+			
+			local R = #category.R:GetChildren() - 1
+			local L = #category.L:GetChildren() - 1
+
+			if L > R then
+				return "R"
+			else
+				return "L"
+			end
+		end
+
+		function category:Sector(name)
+			local sector = {}
+
+			sector.frame = kometa:Create("Frame", {
+				Name = name,
+				BackgroundColor3 = Color3.new(1, 1, 1),
+				BackgroundTransparency = 1,
+				Size = UDim2.new(1, 0, 0, 25),
+				ZIndex = 2
+			})
+
+			sector.container = kometa:Create("Frame", {
+				Name = "Container",
+				BackgroundColor3 = Color3.new(1, 1, 1),
+				BackgroundTransparency = 1,
+				Position = UDim2.new(0, 0, 0, 22),
+				Size = UDim2.new(1, -5, 1, -30),
+				ZIndex = 2
+			})
+
+			sector.title = kometa:Create("TextLabel", {
+				Name = "Title",
+				Text = name,
+				BackgroundColor3 = Color3.new(1, 1, 1),
+				BackgroundTransparency = 1,
+				Size = UDim2.new(1, -5, 0, 25),
+				ZIndex = 2,
+				Font = Enum.Font.GothamSemibold,
+				TextColor3 = theme.text_color,
+				TextSize = 14,
+				TextXAlignment = Enum.TextXAlignment.Left,
+			})
+
+			local uilistlayout = kometa:Create("UIListLayout", {
+				SortOrder = Enum.SortOrder.LayoutOrder
+			})
+
+            uilistlayout.Changed:Connect(function()
+                pcall(function()
+                    sector.frame.Size = UDim2.new(1, 0, 0, sector.container["UIListLayout"].AbsoluteContentSize.Y + 25)
+                    sector.container.Size = UDim2.new(1, 0, 0, sector.container["UIListLayout"].AbsoluteContentSize.Y)
+                end)
+			end)
+			uilistlayout.Parent = sector.container
+			uilistlayout = nil
+
+			function sector:Cheat(kind, name, callback, data)
+				local cheat = {}
+				cheat.value = nil
+
+				cheat.frame = kometa:Create("Frame", {
+					Name = name,
+					BackgroundColor3 = Color3.new(1, 1, 1),
+					BackgroundTransparency = 1,
+					Size = UDim2.new(1, 0, 0, 25),
+					ZIndex = 2,
+				})
+
+				cheat.label = kometa:Create("TextLabel", {
+					Name = "Title",
+					BackgroundColor3 = Color3.new(1, 1, 1),
+					BackgroundTransparency = 1,
+					Size = UDim2.new(1, 0, 1, 0),
+					ZIndex = 2,
+					Font = Enum.Font.Gotham,
+					TextColor3 = theme.text_color,
+					TextSize = 13,
+					Text = name,
+					TextXAlignment = Enum.TextXAlignment.Left
+				})
+
+				cheat.container	= kometa:Create("Frame", {
+					Name = "Container",
+					AnchorPoint = Vector2.new(1, 0.5),
+					BackgroundColor3 = Color3.new(1, 1, 1),
+					BackgroundTransparency = 1,
+					Position = UDim2.new(1, 0, 0.5, 0),
+					Size = UDim2.new(0, 150, 0, 22),
+					ZIndex = 2,
+				})
+				
+				if kind then
+					if string.lower(kind) == "checkbox" or string.lower(kind) == "toggle" then
+						if data then
+							if data.enabled then
+								cheat.value = true
+							end
+						end
+
+						cheat.checkbox = kometa:Create("Frame", {
+							Name = "Checkbox",
+							AnchorPoint = Vector2.new(1, 0),
+							BackgroundColor3 = Color3.new(1, 1, 1),
+							BackgroundTransparency = 1,
+							Position = UDim2.new(1, 0, 0, 0),
+							Size = UDim2.new(0, 25, 0, 25),
+							ZIndex = 2,
+						})
+
+						cheat.outerbox = kometa:Create("ImageLabel", {
+							Name = "Outer",
+							AnchorPoint = Vector2.new(1, 0.5),
+							BackgroundColor3 = Color3.new(1, 1, 1),
+							BackgroundTransparency = 1,
+							Position = UDim2.new(1, 0, 0.5, 0),
+							Size = UDim2.new(0, 20, 0, 20),
+							ZIndex = 2,
+							Image = "rbxassetid://3570695787",
+							ImageColor3 = theme.checkbox_outer,
+							ScaleType = Enum.ScaleType.Slice,
+							SliceCenter = Rect.new(100, 100, 100, 100),
+							SliceScale = 0.06,
+						})
+
+						cheat.checkboxbutton = kometa:Create("ImageButton", {
+							AnchorPoint = Vector2.new(0.5, 0.5),
+							Name = "CheckboxButton",
+							BackgroundColor3 = Color3.new(1, 1, 1),
+							BackgroundTransparency = 1,
+							Position = UDim2.new(0.5, 0, 0.5, 0),
+							Size = UDim2.new(0, 14, 0, 14),
+							ZIndex = 2,
+							Image = "rbxassetid://3570695787",
+							ImageColor3 = theme.checkbox_inner,
+							ScaleType = Enum.ScaleType.Slice,
+							SliceCenter = Rect.new(100, 100, 100, 100),
+							SliceScale = 0.04
+						})
+
+						if data then
+							if data.enabled then
+								kometa.gs["TweenService"]:Create(cheat.outerbox, TweenInfo.new(0.2), {ImageColor3 = theme.checkbox_checked}):Play()
+								kometa.gs["TweenService"]:Create(cheat.checkboxbutton, TweenInfo.new(0.2), {ImageColor3 = theme.checkbox_checked}):Play()
+							end
+						end
+
+						cheat.checkboxbutton.MouseEnter:Connect(function()
+							local lightertheme = Color3.fromRGB((theme.checkbox_outer.R * 255) + 20, (theme.checkbox_outer.G * 255) + 20, (theme.checkbox_outer.B * 255) + 20)
+							kometa.gs["TweenService"]:Create(cheat.outerbox, TweenInfo.new(0.2), {ImageColor3 = lightertheme}):Play()
+						end)
+						cheat.checkboxbutton.MouseLeave:Connect(function()
+							if not cheat.value then
+								kometa.gs["TweenService"]:Create(cheat.outerbox, TweenInfo.new(0.2), {ImageColor3 = theme.checkbox_outer}):Play()
+							else
+								kometa.gs["TweenService"]:Create(cheat.outerbox, TweenInfo.new(0.2), {ImageColor3 = theme.checkbox_checked}):Play()
+							end
+						end)
+						cheat.checkboxbutton.MouseButton1Down:Connect(function()
+							if cheat.value then
+								kometa.gs["TweenService"]:Create(cheat.checkboxbutton, TweenInfo.new(0.2), {ImageColor3 = theme.checkbox_outer}):Play()
+							else
+								kometa.gs["TweenService"]:Create(cheat.checkboxbutton, TweenInfo.new(0.2), {ImageColor3 = theme.checkbox_checked}):Play()
+							end
+						end)
+						cheat.checkboxbutton.MouseButton1Up:Connect(function()
+							cheat.value = not cheat.value
+
+							if callback then
+								local s, e = pcall(function()
+									callback(cheat.value)
+								end)
+
+								if not s then warn("error: ".. e) end
+							end
+
+							if cheat.value then
+								kometa.gs["TweenService"]:Create(cheat.outerbox, TweenInfo.new(0.2), {ImageColor3 = theme.checkbox_checked}):Play()
+							else
+								kometa.gs["TweenService"]:Create(cheat.outerbox, TweenInfo.new(0.2), {ImageColor3 = theme.checkbox_outer}):Play()
+								kometa.gs["TweenService"]:Create(cheat.checkboxbutton, TweenInfo.new(0.2), {ImageColor3 = theme.checkbox_inner}):Play()
+							end
+						end)
+
+						cheat.checkboxbutton.Parent = cheat.outerbox
+                        cheat.outerbox.Parent = cheat.container
+                    elseif string.lower(kind) == "color" or string.lower(kind) == "colorpicker" then
+                        cheat.value = Color3.new(1, 1, 1);
+
+						if data then
+							if data.color then
+								cheat.value = data.color
+							end
                         end
-                    end
-                end
-            end
-            if not awb then api.tween(1,temptable.gacf(temptable.windy, 5)) task.wait(1) awb = true end
-            if awb and temptable.windy.Name == "Windy" then
-                api.humanoidrootpart().CFrame = temptable.gacf(temptable.windy, 25) temptable.float = true task.wait()
-            end
-        end 
-        enableall()
-        temptable.stats.killedwindy = temptable.stats.killedwindy + 1
-        temptable.float = false
-        temptable.started.windy = false
-    end
-end end)
+                        
+                        local hsvimage = "rbxassetid://4613607014"
+                        local lumienceimage = "rbxassetid://4613627894"
+                        
+                        cheat.hsvbar = kometa:Create("ImageButton", {
+							AnchorPoint = Vector2.new(0.5, 0.5),
+							Name = "HSVBar",
+							BackgroundColor3 = Color3.new(1, 1, 1),
+							BackgroundTransparency = 1,
+							Position = UDim2.new(0.5, 0, 0.5, 0),
+							Size = UDim2.new(1, 0, 0, 6),
+							ZIndex = 2,
+                            Image = hsvimage
+                        })
 
-task.spawn(function() while task.wait(0.001) do
-    if kometa.toggles.traincrab then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-259, 111.8, 496.4) * CFrame.fromEulerAnglesXYZ(0, 110, 90) temptable.float = true temptable.float = false end
-    if kometa.toggles.autodig then if kometa.toggles.collectorsteal then workspace.NPCs.Onett.Onett["Porcelain Dipper"].ClickEvent:FireServer() end if game.Players.LocalPlayer then if game.Players.LocalPlayer.Character then if game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool") then if game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool"):FindFirstChild("ClickEvent", true) then clickevent = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool"):FindFirstChild("ClickEvent", true) or nil end end end if clickevent then clickevent:FireServer() end end end
-end end)
+                        cheat.arrowpreview = kometa:Create("ImageLabel", {
+                            Name = "ArrowPreview",
+                            BackgroundColor3 = Color3.new(1, 1, 1),
+                            BackgroundTransparency = 1,
+                            ImageTransparency = 0.25,
+                            Position = UDim2.new(0.5, 0, 0.5, -6),
+                            Size = UDim2.new(0, 6, 0, 6),
+                            ZIndex = 3,
+                            Image = "rbxassetid://2500573769",
+                            Rotation = -90
+                        })
+                        
+                        cheat.hsvbar.MouseButton1Down:Connect(function()
+                            local rs = kometa.gs["RunService"]
+                            local uis = kometa.gs["UserInputService"]local last = cheat.value;
 
-game:GetService("Workspace").Particles.Folder2.ChildAdded:Connect(function(child)
-    if child.Name == "Sprout" then
-        temptable.sprouts.detected = true
-        temptable.sprouts.coords = child.CFrame
-    end
-end)
-game:GetService("Workspace").Particles.Folder2.ChildRemoved:Connect(function(child)
-    if child.Name == "Sprout" then
-        task.wait(30)
-        temptable.sprouts.detected = false
-        temptable.sprouts.coords = ""
-    end
-    if kometa.toggles.farmsprouts then temptable.stats.farmedsprouts = temptable.stats.farmedsprouts + 1 end
-end)
+                            cheat.hsvbar.Image = hsvimage
 
-Workspace.Particles.ChildAdded:Connect(function(instance)
-    if string.find(instance.Name, "Vicious") then
-        temptable.detected.vicious = true
-        if kometa.webhooking.vicious then api.imagehook(kometawebhook.webhook, "Vicious Bee detected!", "kometa ☄️", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/1/1f/Vicious_Bee.png/revision/latest/scale-to-width-down/350?cb=20181130115012&path-prefix=ru") end
-    end
-end)
-Workspace.Particles.ChildRemoved:Connect(function(instance)
-    if string.find(instance.Name, "Vicious") then
-        temptable.detected.vicious = false
-    end
-end)
-game:GetService("Workspace").NPCBees.ChildAdded:Connect(function(v)
-    if v.Name == "Windy" then
-        task.wait(3) temptable.windy = v temptable.detected.windy = true
-        if kometa.webhooking.windy then api.imagehook(kometawebhook.webhook, "Windy Bee detected!", "kometa ☄️", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/8/85/Windy_Bee.png/revision/latest?cb=20200404000105") end
-    end
-end)
-game:GetService("Workspace").NPCBees.ChildRemoved:Connect(function(v)
-    if v.Name == "Windy" then
-        task.wait(3) temptable.windy = nil temptable.detected.windy = false
-    end
-end)
+                            while uis:IsMouseButtonPressed'MouseButton1' do
+                                local mouseloc = uis:GetMouseLocation()
+                                local sx = cheat.arrowpreview.AbsoluteSize.X / 2;
+                                local offset = (mouseloc.x - cheat.hsvbar.AbsolutePosition.X) - sx
+                                local scale = offset / cheat.hsvbar.AbsoluteSize.X
+                                local position = math.clamp(offset, -sx, cheat.hsvbar.AbsoluteSize.X - sx) / cheat.hsvbar.AbsoluteSize.X
 
-task.spawn(function() while task.wait(.1) do
-    if not temptable.converting then
-        if kometa.toggles.autodonate then
-            game.ReplicatedStorage.Events.WindShrineDonation:InvokeServer(kometa.vars.donatit[1], kometa.vars.donatit[2])
-            if not donotdonatedrop then game.ReplicatedStorage.Events.WindShrineTrigger:FireServer() end
-            for i,v in pairs(game.Workspace.Collectibles:GetChildren()) do
-                if (v.Position-Vector3.new(-484, 142, 413)).magnitude < 35 and v.CFrame.YVector.Y == 1 then
-                    api.humanoidrootpart().CFrame = v.CFrame
-                end
-            end
-        end
-        if kometa.toggles.autosamovar then
-            game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Samovar")
-            platformm = game:GetService("Workspace").Toys.Samovar.Platform
-            for i,v in pairs(game.Workspace.Collectibles:GetChildren()) do
-                if (v.Position-platformm.Position).magnitude < 25 and v.CFrame.YVector.Y == 1 then
-                    api.humanoidrootpart().CFrame = v.CFrame
-                end
-            end
-        end
-        if kometa.toggles.autostockings then
-            game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Stockings")
-            platformm = game:GetService("Workspace").Toys.Stockings.Platform
-            for i,v in pairs(game.Workspace.Collectibles:GetChildren()) do
-                if (v.Position-platformm.Position).magnitude < 25 and v.CFrame.YVector.Y == 1 then
-                    api.humanoidrootpart().CFrame = v.CFrame
-                end
-            end
-        end
-        if kometa.toggles.autoonettart then
-            game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Onett's Lid Art")
-            platformm = game:GetService("Workspace").Toys["Onett's Lid Art"].Platform
-            for i,v in pairs(game.Workspace.Collectibles:GetChildren()) do
-                if (v.Position-platformm.Position).magnitude < 25 and v.CFrame.YVector.Y == 1 then
-                    api.humanoidrootpart().CFrame = v.CFrame
-                end
-            end
-        end
-        if kometa.toggles.autocandles then
-            game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Honeyday Candles")
-            platformm = game:GetService("Workspace").Toys["Honeyday Candles"].Platform
-            for i,v in pairs(game.Workspace.Collectibles:GetChildren()) do
-                if (v.Position-platformm.Position).magnitude < 25 and v.CFrame.YVector.Y == 1 then
-                    api.humanoidrootpart().CFrame = v.CFrame
-                end
-            end
-        end
-        if kometa.toggles.autofeast then
-            game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Beesmas Feast")
-            platformm = game:GetService("Workspace").Toys["Beesmas Feast"].Platform
-            for i,v in pairs(game.Workspace.Collectibles:GetChildren()) do
-                if (v.Position-platformm.Position).magnitude < 25 and v.CFrame.YVector.Y == 1 then
-                    api.humanoidrootpart().CFrame = v.CFrame
-                end
-            end
-        end
-    end
-end end)
+                                kometa.gs["TweenService"]:Create(cheat.arrowpreview, TweenInfo.new(0.1), {Position = UDim2.new(position, 0, 0.5, -6)}):Play()
+                                
+                                cheat.value = Color3.fromHSV(math.clamp(scale, 0, 1), 1, 1)
 
-task.spawn(function() while task.wait(1) do
-    temptable.stats.runningfor = temptable.stats.runningfor + 1
-    temptable.stats.sincelasthoneymaking = temptable.stats.sincelasthoneymaking + 1
-    temptable.honeycurrent = statsget().Totals.Honey
-    if kometa.toggles.honeystorm then game.ReplicatedStorage.Events.ToyEvent:FireServer("Honeystorm") end
-    if kometa.toggles.autospawnsprout then game.ReplicatedStorage.Events.ToyEvent:FireServer("Sprout Summoner") end
-    if kometa.toggles.collectgingerbreads then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Gingerbread House") end
-    if kometa.toggles.autodispense then
-        if kometa.dispensesettings.rj then local A_1 = "Free Royal Jelly Dispenser" local Event = game:GetService("ReplicatedStorage").Events.ToyEvent Event:FireServer(A_1) end
-        if kometa.dispensesettings.blub then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Blueberry Dispenser") end
-        if kometa.dispensesettings.straw then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Strawberry Dispenser") end
-        if kometa.dispensesettings.treat then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Treat Dispenser") end
-        if kometa.dispensesettings.coconut then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Coconut Dispenser") end
-        if kometa.dispensesettings.glue then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Glue Dispenser") end
-    end
-    if kometa.toggles.autoboosters then 
-        if kometa.dispensesettings.white then game.ReplicatedStorage.Events.ToyEvent:FireServer("Field Booster") end
-        if kometa.dispensesettings.red then game.ReplicatedStorage.Events.ToyEvent:FireServer("Red Field Booster") end
-        if kometa.dispensesettings.blue then game.ReplicatedStorage.Events.ToyEvent:FireServer("Blue Field Booster") end
-    end
-    if kometa.toggles.clock then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Wealth Clock") end
-    if kometa.toggles.freeantpass then game:GetService("ReplicatedStorage").Events.ToyEvent:FireServer("Free Ant Pass Dispenser") end
-    game.CoreGui.kometaUI.Container.Categories.Statistics.L["Statistics"].Container["Gained Honey"].Title.Text = "Gained Honey: "..api.suffixstring(temptable.honeycurrent - temptable.honeystart)
-    game.CoreGui.kometaUI.Container.Categories.Statistics.L["Statistics"].Container["Elapsed Time"].Title.Text = "Elapsed Time: "..api.toHMS(temptable.stats.runningfor)
-    game.CoreGui.kometaUI.Container.Categories.Statistics.L["Statistics"].Container["Farmed Sprouts"].Title.Text = "Farmed Sprouts: "..temptable.stats.farmedsprouts
-    game.CoreGui.kometaUI.Container.Categories.Statistics.L["Statistics"].Container["Killed Windy"].Title.Text = "Killed Windy: "..temptable.stats.killedwindy
-    game.CoreGui.kometaUI.Container.Categories.Statistics.L["Statistics"].Container["Killed Vicious"].Title.Text = "Killed Vicious: "..temptable.stats.killedvicious
-    game.CoreGui.kometaUI.Container.Categories.Statistics.L["Statistics"].Container["Farmed Ants"].Title.Text = "Farmed Ants: "..temptable.stats.farmedants
-    if kometa.toggles.visualnight then
-        game:GetService("Lighting").TimeOfDay = '00:00:00'
-        game:GetService("Lighting").Brightness = 0.03
-        game:GetService("Lighting").ClockTime = 0
-    end
-end end)
+                                if cheat.value ~= last then
+                                    last = cheat.value
+                                    
+                                    if callback then
+                                        local s, e = pcall(function()
+                                            callback(cheat.value)
+                                        end)
+        
+                                        if not s then warn("error: ".. e) end
+                                    end
+                                end
 
-game:GetService('RunService').Heartbeat:connect(function() 
-    if kometa.toggles.autoquest then firesignal(game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.NPC.ButtonOverlay.MouseButton1Click) end
-    if kometa.toggles.loopspeed then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = kometa.vars.walkspeed end
-    if kometa.toggles.loopjump then game.Players.LocalPlayer.Character.Humanoid.JumpPower = kometa.vars.jumppower end
-end)
+                                rs.RenderStepped:wait()
+                            end
+                        end)
+                        cheat.hsvbar.MouseButton2Down:Connect(function()
+                            local rs = kometa.gs["RunService"]
+                            local uis = kometa.gs["UserInputService"]
+                            local last = cheat.value;
 
-game:GetService('RunService').Heartbeat:connect(function()
-    for i,v in next, game.Players.LocalPlayer.PlayerGui.ScreenGui:WaitForChild("MinigameLayer"):GetChildren() do for k,q in next, v:WaitForChild("GuiGrid"):GetDescendants() do if q.Name == "ObjContent" or q.Name == "ObjImage" then q.Visible = true end end end
-end)
+                            cheat.hsvbar.Image = lumienceimage
 
-game:GetService('RunService').Heartbeat:connect(function() 
-    if temptable.float then 
-        if not setfflag then
-            game.Players.LocalPlayer.Character.Humanoid.BodyTypeScale.Value = 0 
-            floatpad.CanCollide = true 
-            floatpad.CFrame = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X, game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y-3.75, game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z) task.wait(0)  
-        else
-            api.humanoid():ChangeState(11)
-        end
-    else 
-        if not setfflag then floatpad.CanCollide = false end
-    end
-end)
+                            while uis:IsMouseButtonPressed'MouseButton2' do
+                                local mouseloc = uis:GetMouseLocation()
+                                local sx = cheat.arrowpreview.AbsoluteSize.X / 2
+                                local offset = (mouseloc.x - cheat.hsvbar.AbsolutePosition.X) - sx
+                                local scale = offset / cheat.hsvbar.AbsoluteSize.X
+                                local position = math.clamp(offset, -sx, cheat.hsvbar.AbsoluteSize.X - sx) / cheat.hsvbar.AbsoluteSize.X
 
-local vu = game:GetService("VirtualUser")
-game:GetService("Players").LocalPlayer.Idled:connect(function() vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)task.wait(1)vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-end)
+                                kometa.gs["TweenService"]:Create(cheat.arrowpreview, TweenInfo.new(0.1), {Position = UDim2.new(position, 0, 0.5, -6)}):Play()
+                                
+                                cheat.value = Color3.fromHSV(1, 0, 1 - math.clamp(scale, 0, 1))
 
-task.spawn(function()while task.wait() do
-    if kometa.toggles.farmsnowflakes then
-        for i,v in next, temptable.tokenpath:GetChildren() do
-            if v:FindFirstChildOfClass("Decal") and v:FindFirstChildOfClass("Decal").Texture == "rbxassetid://6087969886" and v.Transparency == 0 then
-                -- api.humanoidrootpart().CFrame = CFrame.new(v.Position.X, v.Position.Y+3, v.Position.Z)
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(20, 0, 0) 
-                task.wait(.1) 
-                repeat 
-                    task.wait() 
-                    api.humanoid().WalkSpeed = 25 
-                    api.walkTo(v.Position)
-                until not v.Parent or v.CFrame.YVector.Y ~= 1 
-                break
-            end
-        end
-    end
-end end)
+                                if cheat.value ~= last then
+                                    last = cheat.value
 
-game.Players.PlayerAdded:Connect(function(player)
-    if kometa.webhooking.playeradded then api.imagehook(kometawebhook.webhook, player.Name.." joined your server", "kometa ☄️", "https://www.roblox.com/headshot-thumbnail/image?userId="..player.UserId.."&width=420&height=420&format=png") end
-end)
+                                    if callback then
+                                        local s, e = pcall(function()
+                                            callback(cheat.value)
+                                        end)
+        
+                                        if not s then warn("error: ".. e) end
+                                    end
+                                end
 
-game.Workspace.Collectibles.ChildAdded:Connect(function(token)
-    if kometa.toggles.farmtickets and temptable.collecting.tickets == false then farmtickets(token) end
-    if kometa.toggles.farmrares and temptable.collecting.rares == false then farmrares(token) end
-end)
+                                rs.RenderStepped:wait()
+                            end
+                        end)
 
-game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
-    humanoid = char:WaitForChild("Humanoid")
-    humanoid.Died:Connect(function()
-        if kometa.toggles.autofarm then
-            temptable.dead = true
-            kometa.toggles.autofarm = false
-            temptable.converting = false
-            temptable.farmtoken = false
-        end
-        if temptable.dead then
-            task.wait(25)
-            temptable.dead = false
-            kometa.toggles.autofarm = true local player = game.Players.LocalPlayer
-            temptable.converting = false
-            temptable.tokensfarm = true
-        end
-    end)
-end)
+						cheat.hsvbar.Parent = cheat.container
+						cheat.arrowpreview.Parent = cheat.hsvbar
+					elseif string.lower(kind) == "dropdown" then
+						if data then
+							if data.default then
+								cheat.value = data.default
+							elseif data.options then
+								cheat.value = data.options[1]
+							else
+								cheat.value = "None"
+							end
+						end
+						
+						local options
+						
+						if data and data.options then
+							options = data.options
+						end
 
-game:GetService("Workspace").Particles:FindFirstChild('PopStars').ChildAdded:Connect(function(v)
-    task.wait(.1)
-    if (v.Position-api.humanoidrootpart().Position).magnitude < 15 then
-        temptable.foundpopstar = true
-    end
-end)
+						cheat.dropped = false
 
-game:GetService("Workspace").Particles:FindFirstChild('PopStars').ChildRemoved:Connect(function(v)
-    if (v.Position-api.humanoidrootpart().Position).magnitude < 15 then
-        temptable.foundpopstar = false
-        temptable.float = false
-    end
-end)
+						cheat.dropdown = kometa:Create("ImageButton", {
+							Name = "Dropdown",
+							BackgroundColor3 = Color3.new(1, 1, 1),
+							BackgroundTransparency = 1,
+							Size = UDim2.new(1, 0, 1, 0),
+							ZIndex = 2,
+							Image = "rbxassetid://3570695787",
+							ImageColor3 = theme.dropdown_background,
+							ImageTransparency = 0.5,
+							ScaleType = Enum.ScaleType.Slice,
+							SliceCenter = Rect.new(100, 100, 100, 100),
+							SliceScale = 0.02
+						})
 
-for _,v in next, game.Workspace.Collectibles:GetChildren() do
-    if string.find(v.Name,"") then
-        v:Destroy()
-    end
-end 
+						cheat.selected = kometa:Create("TextLabel", {
+							Name = "Selected",
+							BackgroundColor3 = Color3.new(1, 1, 1),
+							BackgroundTransparency = 1,
+							Position = UDim2.new(0, 10, 0, 0),
+							Size = UDim2.new(1, -35, 1, 0),
+							ZIndex = 2,
+							Font = Enum.Font.Gotham,
+							Text = tostring(cheat.value),
+							TextColor3 = theme.dropdown_text,
+							TextSize = 13,
+							TextXAlignment = Enum.TextXAlignment.Left
+						})
 
-task.spawn(function() while task.wait() do
-    pos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
-    task.wait(0.00001)
-    currentSpeed = (pos-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude
-    if currentSpeed > 0 then
-        temptable.running = true
-    else
-        temptable.running = false
-    end
-end end)
+						cheat.list = kometa:Create("ScrollingFrame", {
+							Name = "List",
+							BackgroundColor3 = theme.dropdown_background,
+							BackgroundTransparency = 0.5,
+							BorderSizePixel = 0,
+							Position = UDim2.new(0, 0, 1, 0),
+							Size = UDim2.new(1, 0, 0, 100),
+							ZIndex = 3,
+							BottomImage = "rbxassetid://967852042",
+							MidImage = "rbxassetid://967852042",
+							TopImage = "rbxassetid://967852042",
+							ScrollBarThickness = 4,
+							VerticalScrollBarInset = Enum.ScrollBarInset.None,
+							ScrollBarImageColor3 = theme.dropdown_scrollbar_color
+						})
 
-task.spawn(function() while task.wait(.00000000000000001) do
-    if kometa.beessettings.usbtoggle then
-        if not game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.BeePopUp.TypeName.Text:match(kometa.beessettings.usb) then
-            temptable.feed(kometa.beessettings.general.x, kometa.beessettings.general.y, "RoyalJelly")
-        end
-    end
-    if kometa.beessettings.ugb then
-        if not game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.BeePopUp.TypeName.Text:match("Gifted") then
-            temptable.feed(kometa.beessettings.general.x, kometa.beessettings.general.y, kometa.beessettings.foodtype)
-        end
-    end
-    if kometa.beessettings.af then
-        temptable.feed(kometa.beessettings.general.x, kometa.beessettings.general.y, kometa.beessettings.foodtype, kometa.beessettings.general.amount)
-    end
-    if kometa.beessettings.umb then
-        if not game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.BeePopUp.MutationFrame.MutationLabel.Text:match(kometa.beessettings.mutation) then
-            temptable.feed(kometa.beessettings.general.x, kometa.beessettings.general.y, "Bitterberry", kometa.beessettings.general.amount)
-        end
-    end
-end end)
+						local uilistlayout = kometa:Create("UIListLayout", {
+							SortOrder = Enum.SortOrder.LayoutOrder,
+							Padding = UDim.new(0, 2)
+						})
+						uilistlayout.Parent = cheat.list
+						uilistlayout = nil
+						local uipadding = kometa:Create("UIPadding", {
+							PaddingLeft = UDim.new(0, 2)
+						})
+						uipadding.Parent = cheat.list
+						uipadding = nil
+						
+						local function refreshOptions()
+							if cheat.dropped then
+								cheat.fadelist()
+							end	
+							
+							for _, child in next, cheat.list:GetChildren() do
+								if child:IsA("TextButton") then
+									child:Destroy()
+								end
+							end
+							
+							for _, value in next, options do
+								local button = kometa:Create("TextButton", {
+									BackgroundColor3 = Color3.new(1, 1, 1),
+									BackgroundTransparency = 1,
+									Size = UDim2.new(1, 0, 0, 20),
+									ZIndex = 3,
+									Font = Enum.Font.Gotham,
+									Text = value,
+									TextColor3 = theme.dropdown_text,
+									TextSize = 13
+								})
+	
+								button.Parent = cheat.list
+	
+								button.MouseEnter:Connect(function()
+									kometa.gs["TweenService"]:Create(button, TweenInfo.new(0.1), {TextColor3 = theme.dropdown_text_hover}):Play()
+								end)
+								button.MouseLeave:Connect(function()
+									kometa.gs["TweenService"]:Create(button, TweenInfo.new(0.1), {TextColor3 = theme.dropdown_text}):Play()
+								end)
+								button.MouseButton1Click:Connect(function()
+									if cheat.dropped then
+										cheat.value = value
+										cheat.selected.Text = value
+	
+										cheat.fadelist()
+										
+										if callback then
+											local s, e = pcall(function()
+												callback(cheat.value)
+											end)
+	
+											if not s then warn("error: ".. e) end
+										end
+									end
+								end)
+								
+								
+								kometa.gs["TweenService"]:Create(button, TweenInfo.new(0), {TextTransparency = 1}):Play()
+							end
+							
+							kometa.gs["TweenService"]:Create(cheat.list, TweenInfo.new(0), {Size = UDim2.new(1, 0, 0, 0), Position = UDim2.new(0, 0, 1, 0), CanvasSize = UDim2.new(0, 0, 0, cheat.list["UIListLayout"].AbsoluteContentSize.Y), ScrollBarImageTransparency = 1, BackgroundTransparency = 1}):Play()
+						end
+						
+						
+						function cheat.fadelist()
+							cheat.dropped = not cheat.dropped
 
--- Rendering game
+							if cheat.dropped then
+								for _, button in next, cheat.list:GetChildren() do
+									if button:IsA("TextButton") then
+										kometa.gs["TweenService"]:Create(button, TweenInfo.new(0.2), {TextTransparency = 0}):Play()
+									end
+								end
 
-game:GetService("UserInputService").WindowFocused:Connect(function()
-	if kometa.toggles.disablerender then
-        game:GetService("RunService"):Set3dRenderingEnabled(true)
-    end
-end)
+								kometa.gs["TweenService"]:Create(cheat.list, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, math.clamp(cheat.list["UIListLayout"].AbsoluteContentSize.Y, 0, 150)), Position = UDim2.new(0, 0, 1, 0), ScrollBarImageTransparency = 0, BackgroundTransparency = 0.5}):Play()
+							else
+								for _, button in next, cheat.list:GetChildren() do
+									if button:IsA("TextButton") then
+										kometa.gs["TweenService"]:Create(button, TweenInfo.new(0.2), {TextTransparency = 1}):Play()
+									end
+								end
 
-game:GetService("UserInputService").WindowFocusReleased:Connect(function()
-	if kometa.toggles.disablerender then
-        game:GetService("RunService"):Set3dRenderingEnabled(false)
-    end
-end)
+								kometa.gs["TweenService"]:Create(cheat.list, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 0), Position = UDim2.new(0, 0, 1, 0), ScrollBarImageTransparency = 1, BackgroundTransparency = 1}):Play()
+							end
+						end
 
-setfflag("HumanoidParallelRemoveNoPhysics", "False")setfflag("HumanoidParallelRemoveNoPhysicsNoSimulate2", "False")
-hives = game.Workspace.Honeycombs:GetChildren() for i = #hives, 1, -1 do  v = game.Workspace.Honeycombs:GetChildren()[i] if v.Owner.Value == nil then game.ReplicatedStorage.Events.ClaimHive:FireServer(v.HiveID.Value) end end
-if _G.autoload then if isfile("kometa/BSS_".._G.autoload..".json") then kometa = game:service'HttpService':JSONDecode(readfile("kometa/BSS_".._G.autoload..".json")) end end
-for _, part in next, workspace:FindFirstChild("FieldDecos"):GetDescendants() do if part:IsA("BasePart") then part.CanCollide = false part.Transparency = part.Transparency < 0.5 and 0.5 or part.Transparency task.wait() end end
-for _, part in next, workspace:FindFirstChild("Decorations"):GetDescendants() do if part:IsA("BasePart") and (part.Parent.Name == "Bush" or part.Parent.Name == "Blue Flower") then part.CanCollide = false part.Transparency = part.Transparency < 0.5 and 0.5 or part.Transparency task.wait() end end
-for i,v in next, workspace.Decorations.Misc:GetDescendants() do if v.Parent.Name == "Mushroom" then v.CanCollide = false v.Transparency = 0.5 end end
-game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.BeePopUp.MutationFrame.MutationLabel.Text = ""
+						cheat.dropdown.MouseEnter:Connect(function()
+							kometa.gs["TweenService"]:Create(cheat.selected, TweenInfo.new(0.1), {TextColor3 = theme.dropdown_text_hover}):Play()
+						end)
+						cheat.dropdown.MouseLeave:Connect(function()
+							kometa.gs["TweenService"]:Create(cheat.selected, TweenInfo.new(0.1), {TextColor3 = theme.dropdown_text}):Play()
+						end)
+						cheat.dropdown.MouseButton1Click:Connect(function()
+							cheat.fadelist()
+						end)
+
+						refreshOptions()
+						
+						function cheat:RemoveOption(value)
+							local removed = false
+							for index, option in next, options do
+								if option == value then
+									table.remove(options, index)
+									removed = true
+									break
+								end
+							end
+							
+							if removed then
+								refreshOptions()
+							end
+							
+							return removed
+						end
+						
+						function cheat:AddOption(value)
+							table.insert(options, value)
+							
+							refreshOptions()
+						end
+						
+						function cheat:SetValue(value)
+							cheat.selected.Text = value
+							cheat.value = value
+							
+							if cheat.dropped then
+								cheat.fadelist()
+							end
+							
+							if callback then
+								local s, e = pcall(function()
+									callback(cheat.value)
+								end)
+
+								if not s then warn("error: ".. e) end
+							end
+						end
+
+						cheat.selected.Parent = cheat.dropdown
+						cheat.dropdown.Parent = cheat.container
+						cheat.list.Parent = cheat.container
+					elseif string.lower(kind) == "textbox" then
+						local placeholdertext = data and data.placeholder
+
+						cheat.background = kometa:Create("ImageLabel", {
+							Name = "Background",
+							BackgroundColor3 = Color3.new(1, 1, 1),
+							BackgroundTransparency = 1,
+							Size = UDim2.new(1, 0, 1, 0),
+							ZIndex = 2,
+							Image = "rbxassetid://3570695787",
+							ImageColor3 = theme.textbox_background,
+							ImageTransparency = 0.5,
+							ScaleType = Enum.ScaleType.Slice,
+							SliceCenter = Rect.new(100, 100, 100, 100),
+							SliceScale = 0.02
+						})
+
+						cheat.textbox = kometa:Create("TextBox", {
+							Name = "Textbox",
+							BackgroundColor3 = Color3.new(1, 1, 1),
+							BackgroundTransparency = 1,
+							Position = UDim2.new(0, 0, 0, 0),
+							Size = UDim2.new(1, 0, 1, 0),
+							ZIndex = 2,
+							Font = Enum.Font.Gotham,
+							Text = "",
+							TextColor3 = theme.textbox_text,
+							PlaceholderText = placeholdertext or "Value",
+							TextSize = 13,
+                            TextXAlignment = Enum.TextXAlignment.Center,
+                            ClearTextOnFocus = false
+						})
+
+						cheat.background.MouseEnter:Connect(function()
+							kometa.gs["TweenService"]:Create(cheat.textbox, TweenInfo.new(0.1), {TextColor3 = theme.textbox_text_hover}):Play()
+						end)
+						cheat.background.MouseLeave:Connect(function()
+							kometa.gs["TweenService"]:Create(cheat.textbox, TweenInfo.new(0.1), {TextColor3 = theme.textbox_text}):Play()
+						end)
+						cheat.textbox.Focused:Connect(function()
+							typing = true
+
+							kometa.gs["TweenService"]:Create(cheat.background, TweenInfo.new(0.2), {ImageColor3 = theme.textbox_background_hover}):Play()
+						end)
+						cheat.textbox.FocusLost:Connect(function()
+							typing = false
+
+							kometa.gs["TweenService"]:Create(cheat.background, TweenInfo.new(0.2), {ImageColor3 = theme.textbox_background}):Play()
+							kometa.gs["TweenService"]:Create(cheat.textbox, TweenInfo.new(0.1), {TextColor3 = theme.textbox_text}):Play()
+
+							cheat.value = cheat.textbox.Text
+
+							if callback then
+								local s, e = pcall(function()
+									callback(cheat.value)
+								end)
+
+								if not s then warn("error: "..e) end
+							end
+						end)
+
+						cheat.background.Parent = cheat.container
+						cheat.textbox.Parent = cheat.container
+					elseif string.lower(kind) == "slider" then
+						cheat.value = 0
+
+						local suffix = data.suffix or ""
+						local minimum = data.min or 0
+						local maximum = data.max or 1
+						
+						local moveconnection
+						local releaseconnection
+
+						cheat.sliderbar = kometa:Create("ImageButton", {
+							Name = "Sliderbar",
+							AnchorPoint = Vector2.new(1, 0.5),
+							BackgroundColor3 = Color3.new(1, 1, 1),
+							BackgroundTransparency = 1,
+							Position = UDim2.new(1, 0, 0.5, 0),
+							Size = UDim2.new(1, 0, 0, 6),
+							ZIndex = 2,
+							Image = "rbxassetid://3570695787",
+							ImageColor3 = theme.slider_background,
+							ImageTransparency = 0.5,
+							ScaleType = Enum.ScaleType.Slice,
+							SliceCenter = Rect.new(100, 100, 100, 100),
+							SliceScale = 0.02,
+						})
+
+						cheat.numbervalue = kometa:Create("TextLabel", {
+							Name = "Value",
+							AnchorPoint = Vector2.new(0, 0.5),
+							BackgroundColor3 = Color3.new(1, 1, 1),
+							BackgroundTransparency = 1,
+							Position = UDim2.new(0.5, 5, 0.5, 0),
+							Size = UDim2.new(1, 0, 0, 13),
+							ZIndex = 2,
+							Font = Enum.Font.Gotham,
+							TextXAlignment = Enum.TextXAlignment.Left,
+							Text = "",
+							TextTransparency = 1,
+							TextColor3 = theme.slider_text,
+							TextSize = 13,
+						})
+
+						cheat.visiframe = kometa:Create("ImageLabel", {
+							Name = "Frame",
+							BackgroundColor3 = Color3.new(1, 1, 1),
+							BackgroundTransparency = 1,
+							Size = UDim2.new(0.5, 0, 1, 0),
+							ZIndex = 2,
+							Image = "rbxassetid://3570695787",
+							ImageColor3 = theme.slider_color,
+							ScaleType = Enum.ScaleType.Slice,
+							SliceCenter = Rect.new(100, 100, 100, 100),
+							SliceScale = 0.02
+						})
+
+						cheat.sliderbar.MouseButton1Down:Connect(function()
+							local size = math.clamp(mouse.X - cheat.sliderbar.AbsolutePosition.X, 0, 150)
+							local percent = size / 150
+
+							cheat.value = math.floor((minimum + (maximum - minimum) * percent) * 100) / 100
+							cheat.numbervalue.Text = tostring(cheat.value) .. suffix
+
+							if callback then
+								local s, e = pcall(function()
+									callback(cheat.value)
+								end)
+
+								if not s then warn("error: ".. e) end
+							end
+
+							kometa.gs["TweenService"]:Create(cheat.visiframe, TweenInfo.new(0.1), {
+								Size = UDim2.new(size / 150, 0, 1, 0),
+								ImageColor3 = theme.slider_color_sliding
+							}):Play()
+
+							kometa.gs["TweenService"]:Create(cheat.numbervalue, TweenInfo.new(0.1), {
+								Position = UDim2.new(size / 150, 5, 0.5, 0),
+								TextTransparency = 0
+							}):Play()
+
+							moveconnection = mouse.Move:Connect(function()
+								local size = math.clamp(mouse.X - cheat.sliderbar.AbsolutePosition.X, 0, 150)
+								local percent = size / 150
+
+								cheat.value = math.floor((minimum + (maximum - minimum) * percent) * 100) / 100
+								cheat.numbervalue.Text = tostring(cheat.value) .. suffix
+
+								if callback then
+									local s, e = pcall(function()
+										callback(cheat.value)
+									end)
+
+									if not s then warn("error: ".. e) end
+								end
+
+								kometa.gs["TweenService"]:Create(cheat.visiframe, TweenInfo.new(0.1), {
+									Size = UDim2.new(size / 150, 0, 1, 0),
+								ImageColor3 = theme.slider_color_sliding
+                                }):Play()
+                                
+                                local Position = UDim2.new(size / 150, 5, 0.5, 0);
+
+                                if Position.Width.Scale >= 0.6 then
+                                    Position = UDim2.new(1, -cheat.numbervalue.TextBounds.X, 0.5, 10);
+                                end
+
+								kometa.gs["TweenService"]:Create(cheat.numbervalue, TweenInfo.new(0.1), {
+									Position = Position,
+									TextTransparency = 0
+								}):Play()
+							end)
+
+							releaseconnection = kometa.gs["UserInputService"].InputEnded:Connect(function(Mouse)
+								if Mouse.UserInputType == Enum.UserInputType.MouseButton1 then
+
+									kometa.gs["TweenService"]:Create(cheat.visiframe, TweenInfo.new(0.1), {
+										ImageColor3 = theme.slider_color
+									}):Play()
+
+									kometa.gs["TweenService"]:Create(cheat.numbervalue, TweenInfo.new(0.1), {
+										TextTransparency = 1
+									}):Play()
+
+									moveconnection:Disconnect()
+									moveconnection = nil
+									releaseconnection:Disconnect()
+									releaseconnection = nil
+								end
+							end)
+						end)
+
+						cheat.visiframe.Parent = cheat.sliderbar
+						cheat.numbervalue.Parent = cheat.sliderbar
+						cheat.sliderbar.Parent = cheat.container
+					elseif string.lower(kind) == "button" then
+						local button_text = data and data.text
+
+						cheat.background = kometa:Create("ImageLabel", {
+							Name = "Background",
+							BackgroundColor3 = Color3.new(1, 1, 1),
+							BackgroundTransparency = 1,
+							Size = UDim2.new(1, 0, 1, 0),
+							ZIndex = 2,
+							Image = "rbxassetid://3570695787",
+							ImageColor3 = theme.button_background,
+							ImageTransparency = 0.5,
+							ScaleType = Enum.ScaleType.Slice,
+							SliceCenter = Rect.new(100, 100, 100, 100),
+							SliceScale = 0.02
+						})
+
+						cheat.button = kometa:Create("TextButton", {
+							Name = "Button",
+							BackgroundColor3 = Color3.new(1, 1, 1),
+							BackgroundTransparency = 1,
+							Position = UDim2.new(0, 0, 0, 0),
+							Size = UDim2.new(1, 0, 1, 0),
+							ZIndex = 2,
+							Font = Enum.Font.Gotham,
+							Text = button_text or "Button",
+							TextColor3 = theme.textbox_text,
+							TextSize = 13,
+							TextXAlignment = Enum.TextXAlignment.Center
+						})
+
+						cheat.button.MouseEnter:Connect(function()
+							kometa.gs["TweenService"]:Create(cheat.background, TweenInfo.new(0.2), {ImageColor3 = theme.button_background_hover}):Play()
+						end)
+						cheat.button.MouseLeave:Connect(function()
+							kometa.gs["TweenService"]:Create(cheat.background, TweenInfo.new(0.2), {ImageColor3 = theme.button_background}):Play()
+						end)
+						cheat.button.MouseButton1Down:Connect(function()
+							kometa.gs["TweenService"]:Create(cheat.background, TweenInfo.new(0.2), {ImageColor3 = theme.button_background_down}):Play()
+						end)
+						cheat.button.MouseButton1Up:Connect(function()
+							kometa.gs["TweenService"]:Create(cheat.background, TweenInfo.new(0.2), {ImageColor3 = theme.button_background}):Play()
+							
+							if callback then
+								local s, e = pcall(function()
+									callback()
+								end)
+
+								if not s then warn("error: ".. e) end
+							end
+						end)
+
+						cheat.background.Parent = cheat.container
+						cheat.button.Parent = cheat.container
+					
+					elseif string.lower(kind) == "keybind" or string.lower(kind) == "bind" then
+                        local callback_bind = data and data.bind
+                        local connection
+						
+						cheat.background = kometa:Create("ImageLabel", {
+							Name = "Background",
+							BackgroundColor3 = Color3.new(1, 1, 1),
+							BackgroundTransparency = 1,
+							Size = UDim2.new(1, 0, 1, 0),
+							ZIndex = 2,
+							Image = "rbxassetid://3570695787",
+							ImageColor3 = theme.button_background,
+							ImageTransparency = 0.5,
+							ScaleType = Enum.ScaleType.Slice,
+							SliceCenter = Rect.new(100, 100, 100, 100),
+							SliceScale = 0.02
+						})
+
+						cheat.button = kometa:Create("TextButton", {
+							Name = "Button",
+							BackgroundColor3 = Color3.new(1, 1, 1),
+							BackgroundTransparency = 1,
+							Position = UDim2.new(0, 0, 0, 0),
+							Size = UDim2.new(1, 0, 1, 0),
+							ZIndex = 2,
+							Font = Enum.Font.Gotham,
+							Text = "Click to Bind",
+							TextColor3 = theme.textbox_text,
+							TextSize = 13,
+							TextXAlignment = Enum.TextXAlignment.Center
+						})
+
+						cheat.button.MouseEnter:Connect(function()
+							kometa.gs["TweenService"]:Create(cheat.background, TweenInfo.new(0.2), {ImageColor3 = theme.button_background_hover}):Play()
+						end)
+						cheat.button.MouseLeave:Connect(function()
+							kometa.gs["TweenService"]:Create(cheat.background, TweenInfo.new(0.2), {ImageColor3 = theme.button_background}):Play()
+						end)
+						cheat.button.MouseButton1Down:Connect(function()
+							kometa.gs["TweenService"]:Create(cheat.background, TweenInfo.new(0.2), {ImageColor3 = theme.button_background_down}):Play()
+                        end)
+                        cheat.button.MouseButton2Down:Connect(function()
+							kometa.gs["TweenService"]:Create(cheat.background, TweenInfo.new(0.2), {ImageColor3 = theme.button_background_down}):Play()
+						end)
+						cheat.button.MouseButton1Up:Connect(function()
+							kometa.gs["TweenService"]:Create(cheat.background, TweenInfo.new(0.2), {ImageColor3 = theme.button_background}):Play()
+							cheat.button.Text = "Press key..."
+							
+							if connection then
+								connection:Disconnect()
+								connection = nil
+							end
+
+							connection = kometa.gs["UserInputService"].InputBegan:Connect(function(Input)
+								if Input.UserInputType.Name == "Keyboard" and Input.KeyCode ~= kometaData.ToggleKey and Input.KeyCode ~= Enum.KeyCode.Backspace then
+									cheat.button.Text = "Bound to " .. tostring(Input.KeyCode.Name)
+									
+                                    if connection then
+                                        connection:Disconnect()
+                                        connection = nil
+                                    end
+									
+									delay(0, function()
+										callback_bind = Input.KeyCode
+
+										if callback then
+											local s, e = pcall(function()
+												callback(Input.KeyCode)
+											end)
+			
+											if not s then warn("error: ".. e) end
+										end
+									end)
+								elseif Input.KeyCode == Enum.KeyCode.Backspace then
+									callback_bind = nil
+									cheat.button.Text = "Click to Bind"
+
+									delay(0, function()
+										if callback then
+											local s, e = pcall(function()
+												callback()
+											end)
+			
+											if not s then warn("error: ".. e) end
+										end
+									end)
+
+									connection:Disconnect()
+									connection = nil
+								elseif Input.KeyCode == kometaData.ToggleKey then
+									cheat.button.Text = "Invalid Key";
+								end
+							end)
+						end)
+						
+                        cheat.button.MouseButton2Up:Connect(function()
+							kometa.gs["TweenService"]:Create(cheat.background, TweenInfo.new(0.2), {ImageColor3 = theme.button_background}):Play()
+						
+							callback_bind = nil
+							cheat.button.Text = "Click to Bind"
+
+							delay(0, function()
+								if callback then
+									local s, e = pcall(function()
+										callback()
+									end)
+	
+									if not s then warn("error: ".. e) end
+								end
+							end)
+							
+                            if connection then
+                                connection:Disconnect()
+                                connection = nil
+                            end
+						end)
+						
+						
+						kometa.gs["UserInputService"].InputBegan:Connect(function(Input, Process)
+							if callback_bind and Input.KeyCode == callback_bind and not Process then
+								if callback then
+									local s, e = pcall(function()
+										callback(Input.KeyCode)
+									end)
+	
+									if not s then warn("error: ".. e) end
+								end
+							end
+						end)
+						
+						if callback_bind then
+							cheat.button.Text = "Bound to " .. tostring(callback_bind.Name)
+						end
+
+						cheat.background.Parent = cheat.container
+						cheat.button.Parent = cheat.container
+					end
+				end
+
+				cheat.frame.Parent = sector.container
+				cheat.label.Parent = cheat.frame
+				cheat.container.Parent = cheat.frame
+
+				return cheat
+			end
+
+			sector.frame.Parent = category[calculateSector()]
+			sector.container.Parent = sector.frame
+			sector.title.Parent = sector.frame
+
+			return sector
+		end
+		
+		firstCategory = false
+		
+		return category
+	end
+
+	self:addShadow(self2.container, 0)
+
+	self2.categories.ClipsDescendants = true
+	
+	if not kometa.gs["RunService"]:IsStudio() then
+		self2.userinterface.Parent = self.gs["CoreGui"]
+	else
+		self2.userinterface.Parent = self.gs["Players"].LocalPlayer:WaitForChild("PlayerGui")
+	end
+	
+	self2.container.Parent = self2.userinterface
+	self2.categories.Parent = self2.container
+	self2.sidebar.Parent = self2.container
+	self2.topbar.Parent = self2.container
+	self2.tip.Parent = self2.topbar
+
+	return self2, kometaData
+end
+
+return kometa
