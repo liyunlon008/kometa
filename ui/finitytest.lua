@@ -439,7 +439,7 @@ function kometa.new(isdark, gprojectName, thinProject)
 					largestListSize = largestListSize
 				end
 
-				largestListSize = largestListSize + 25
+				largestListSize = largestListSize + 100
 				
 				category.container.CanvasSize = UDim2.new(0, 0, 0, largestListSize + 5)
 			end
