@@ -151,6 +151,7 @@ function kometa.new(isdark, gprojectName, thinProject)
 	local projectName = false
 	local thinMenu = false
 	
+	if thinProject and typeof(thinProject) == "UDim2" then if thinProject.Width.Offset > 750 then thinProject = nil end end
 	if isdark == true then theme = kometa.dark_theme end
 	if gprojectName then projectName = gprojectName end
 	if thinProject then thinMenu = thinProject end
