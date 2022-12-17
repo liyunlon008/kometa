@@ -433,14 +433,13 @@ function kometa.new(isdark, gprojectName, thinProject)
 			local function computeSizeChange()
 				local largestListSize = 0
 				
-				largestListSize = uilistlayout.AbsoluteContentSize.Y
+				largestListSize = uilistlayout.AbsoluteContentSize.Y + 50
 				
 				if uilistlayout2.AbsoluteContentSize.Y > largestListSize then
-					largestListSize = largestListSize + 500
+					largestListSize = largestListSize
 				end
 				
 				category.container.CanvasSize = UDim2.new(0, 0, 0, largestListSize + 5)
-				print(largestListSize)
 			end
 			
 			uilistlayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(computeSizeChange)
