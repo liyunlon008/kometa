@@ -18,3 +18,5 @@ local Websocket_Manager = {
         end
     end
 }
+
+return Websocket_Manager
