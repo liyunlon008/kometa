@@ -20,7 +20,7 @@ local hi = false
 -- Script tables
 
 local temptable = {
-    version = "1.2.0",
+    version = "1.2.1",
     blackfield = "Ant Field",
     redfields = {},
     bluefields = {},
@@ -29,6 +29,7 @@ local temptable = {
     balloondetected = false,
     puffshroomdetected = false,
     magnitude = 70,
+    size = nil,
     running = false,
     configname = "",
     tokenpath = game:GetService("Workspace").Collectibles,
@@ -151,7 +152,6 @@ local planterst = {}
 local planterstindexed = {}
 
 if temptable.honeystart == 0 then temptable.honeystart = statstable.Totals.Honey end
-
 
 for i,v in next, game:GetService("Workspace").MonsterSpawners:GetDescendants() do if v.Name == "TimerAttachment" then v.Name = "Attachment" end end
 for i,v in next, game:GetService("Workspace").MonsterSpawners:GetChildren() do if v.Name == "RoseBush" then v.Name = "ScorpionBush" elseif v.Name == "RoseBush2" then v.Name = "ScorpionBush2" end end
@@ -404,6 +404,7 @@ function farmtickets(v)
             decal = v:FindFirstChildOfClass("Decal") 
             if decal.Texture ~= "1674871631" and decal.Texture ~= "rbxassetid://1674871631" then return end
             temptable.collecting.tickets = true
+            temptable.float = true
             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(20, 0, 0) 
             task.wait(.1) 
             repeat 
@@ -412,6 +413,7 @@ function farmtickets(v)
                 api.walkTo(v.Position)
             until not v.Parent or v.CFrame.YVector.Y ~= 1 
             temptable.collecting.tickets = false
+            if temptable.float then temptable.float = false end
         end
     end 
 end
@@ -424,12 +426,14 @@ function farmrares(v)
             temptable.collecting.rares = true
             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(20, 0, 0) 
             task.wait(.1) 
+            temptable.float = true
             repeat 
                 task.wait() 
                 api.humanoid().WalkSpeed = 25 
                 api.walkTo(v.Position)
             until not v.Parent or v.CFrame.YVector.Y ~= 1 
             temptable.collecting.rares = false
+            if temptable.float then temptable.float = false end
         end 
     end
 end
@@ -1032,7 +1036,7 @@ function makequests()
     end end end end end end)
 end
 
-local ui = library.new(true, "kometa ☄️ | "..temptable.version, UDim2.new(0, 550, 0, 350))
+local ui = library.new(true, "kometa ☄️ | "..temptable.version, _G.size or UDim2.new(0, 550, 0, 350))
 ui.ChangeToggleKey(Enum.KeyCode.Semicolon)
 
 local hometab = ui:Category("Home")
@@ -1076,28 +1080,29 @@ farm:Cheat("Checkbox", "Farm Precise Crosshairs", function(State) kometa.toggles
 farm:Cheat("Checkbox", "Farm Fuzzy Bombs", function(State) kometa.toggles.farmfuzzy = State end)
 farm:Cheat("Checkbox", "Farm Under Balloons", function(State) kometa.toggles.farmballoons = State end)
 farm:Cheat("Checkbox", "Farm Under Clouds", function(State) kometa.toggles.farmclouds = State end)
-farm:Cheat("Checkbox", "Auto Dispenser ⚙", function(State) kometa.toggles.autodispense = State end)
-farm:Cheat("Checkbox", "Auto Field Boosters ⚙", function(State) kometa.toggles.autoboosters = State end)
-farm:Cheat("Checkbox", "Auto Wealth Clock", function(State) kometa.toggles.clock = State end)
-farm:Cheat("Checkbox", "Auto Free Antpasses", function(State) kometa.toggles.freeantpass = State end)
-farm:Cheat("Checkbox", "Auto Special Sprout Summoner", function(State) kometa.toggles.autospawnsprout = State end)
-farm:Cheat("Checkbox", "Auto Honeystorm", function(State) kometa.toggles.honeystorm = State end)
--- farm:Cheat("Checkbox", "Auto Gingerbread Bears", function(State) kometa.toggles.collectgingerbreads = State end)
--- farm:Cheat("Checkbox", "Auto Samovar", function(State) kometa.toggles.autosamovar = State end)
--- farm:Cheat("Checkbox", "Auto Stockings", function(State) kometa.toggles.autostockings = State end)
--- farm:Cheat("Checkbox", "Auto Honey Candles", function(State) kometa.toggles.autocandles = State end)
--- farm:Cheat("Checkbox", "Auto Beesmas Feast", function(State) kometa.toggles.autofeast = State end)
--- farm:Cheat("Checkbox", "Auto Onett's Lid Art", function(State) kometa.toggles.autoonettart = State end)
--- farm:Cheat("Checkbox", "Use Instant Converters", function(State) kometa.toggles.instantconverters = State end)
--- farm:Cheat("Checkbox", "Farm Snowflakes ⚠️", function(State) kometa.toggles.farmsnowflakes = State end)
-farm:Cheat("Checkbox", "Farm Sprouts", function(State) kometa.toggles.farmsprouts = State end)
-farm:Cheat("Checkbox", "Farm Puffshrooms", function(State) kometa.toggles.farmpuffshrooms = State end)
-farm:Cheat("Checkbox", "Farm Tickets ⚠️", function(State) kometa.toggles.farmtickets = State end)
-farm:Cheat("Checkbox", "Teleport To Rares ⚠️", function(State) kometa.toggles.farmrares = State end)
-farm:Cheat("Checkbox", "Auto Accept/Confirm Quests ⚙", function(State) kometa.toggles.autoquest = State end)
-farm:Cheat("Checkbox", "Auto Do Quests ⚙", function(State) kometa.toggles.autodoquest = State end)
-farm:Cheat("Checkbox", "Face Flames", function(State) kometa.toggles.faceflames = State end)
-farm:Cheat("Checkbox", "Face Balloons", function(State) kometa.toggles.faceballoons = State end)
+local farmsecond = farmtab:Sector("Farming")
+farmsecond:Cheat("Checkbox", "Auto Dispenser ⚙", function(State) kometa.toggles.autodispense = State end)
+farmsecond:Cheat("Checkbox", "Auto Field Boosters ⚙", function(State) kometa.toggles.autoboosters = State end)
+farmsecond:Cheat("Checkbox", "Auto Wealth Clock", function(State) kometa.toggles.clock = State end)
+farmsecond:Cheat("Checkbox", "Auto Free Antpasses", function(State) kometa.toggles.freeantpass = State end)
+farmsecond:Cheat("Checkbox", "Auto Special Sprout Summoner", function(State) kometa.toggles.autospawnsprout = State end)
+farmsecond:Cheat("Checkbox", "Auto Honeystorm", function(State) kometa.toggles.honeystorm = State end)
+-- farmsecond:Cheat("Checkbox", "Auto Gingerbread Bears", function(State) kometa.toggles.collectgingerbreads = State end)
+-- farmsecond:Cheat("Checkbox", "Auto Samovar", function(State) kometa.toggles.autosamovar = State end)
+-- farmsecond:Cheat("Checkbox", "Auto Stockings", function(State) kometa.toggles.autostockings = State end)
+-- farmsecond:Cheat("Checkbox", "Auto Honey Candles", function(State) kometa.toggles.autocandles = State end)
+-- farmsecond:Cheat("Checkbox", "Auto Beesmas Feast", function(State) kometa.toggles.autofeast = State end)
+-- farmsecond:Cheat("Checkbox", "Auto Onett's Lid Art", function(State) kometa.toggles.autoonettart = State end)
+-- farmsecond:Cheat("Checkbox", "Use Instant Converters", function(State) kometa.toggles.instantconverters = State end)
+-- farmsecond:Cheat("Checkbox", "Farm Snowflakes ⚠️", function(State) kometa.toggles.farmsnowflakes = State end)
+farmsecond:Cheat("Checkbox", "Farm Sprouts", function(State) kometa.toggles.farmsprouts = State end)
+farmsecond:Cheat("Checkbox", "Farm Puffshrooms", function(State) kometa.toggles.farmpuffshrooms = State end)
+farmsecond:Cheat("Checkbox", "Farm Tickets ⚠️", function(State) kometa.toggles.farmtickets = State end)
+farmsecond:Cheat("Checkbox", "Teleport To Rares ⚠️", function(State) kometa.toggles.farmrares = State end)
+farmsecond:Cheat("Checkbox", "Auto Accept/Confirm Quests ⚙", function(State) kometa.toggles.autoquest = State end)
+farmsecond:Cheat("Checkbox", "Auto Do Quests ⚙", function(State) kometa.toggles.autodoquest = State end)
+farmsecond:Cheat("Checkbox", "Face Flames", function(State) kometa.toggles.faceflames = State end)
+farmsecond:Cheat("Checkbox", "Face Balloons", function(State) kometa.toggles.faceballoons = State end)
 
 local psec1 = planterstab:Sector("First Planter")
 psec1:Cheat("Dropdown", "Planter", function(Option) kometa.planterssettings[1].Type = Option end, {options=require(game:GetService("ReplicatedStorage").PlanterTypes).INVENTORY_ORDER})
@@ -1119,7 +1124,6 @@ psec3:Cheat("Dropdown", "Field", function(Option) kometa.planterssettings[3].fie
 psec3:Cheat("Slider", "Growth Percent", function(Value) kometa.planterssettings[3].growth = tonumber(Value)/100 or 1 end, {min = 0, max = 100, suffix = "%"})
 psec3:Cheat("Checkbox", "Auto Plant", function(State) kometa.planterssettings[3].enabled = State end)
 psec3:Cheat("Checkbox", "Ignore If Puffshrooms", function(State) kometa.planterssettings[3].safepuffs = State end)
-psec3:Cheat("Label", "") psec3:Cheat("Label", "") psec3:Cheat("Label", "") 
 
 local mobkill = combtab:Sector("Combat")
 mobkill:Cheat("Checkbox", "Train Crab", function(State) if State then api.humanoidrootpart().CFrame = CFrame.new(-307.52117919922, 107.91863250732, 467.86791992188) end end)
@@ -1199,7 +1203,6 @@ misco:Cheat("Dropdown", "Equip Collectors", function(Option) local ohString1 = "
 misco:Cheat("Dropdown", "Generate Amulet", function(Option) local A_1 = Option.." Generator" local Event = game:GetService("ReplicatedStorage").Events.ToyEvent Event:FireServer(A_1) end, {options = {"Supreme Star Amulet", "Diamond Star Amulet", "Gold Star Amulet","Silver Star Amulet","Bronze Star Amulet","Moon Amulet"}})
 misco:Cheat("Button", "Export Stats Table", function() local StatCache = require(game.ReplicatedStorage.ClientStatCache)writefile("Stats_"..api.nickname..".json", StatCache:Encode()) end, {text = ''})
 misco:Cheat("Textbox", "Ping Spoofer", function(Option) settings():GetService("NetworkSettings").IncomingReplicationLag = tonumber(Option)/1000 or 0 end, {placeholder = 'Add ms to ping'})
-misco:Cheat("Label", "") misco:Cheat("Label", "") misco:Cheat("Label", "") misco:Cheat("Label", "") misco:Cheat("Label", "") 
 
 local extras = extrtab:Sector("Extras")
 extras:Cheat("Textbox", "Glider Speed", function(Value) local StatCache = require(game.ReplicatedStorage.ClientStatCache) local stats = StatCache:Get() stats.EquippedParachute = "Glider" local module = require(game:GetService("ReplicatedStorage").Parachutes) local st = module.GetStat local glidersTable = getupvalues(st) glidersTable[1]["Glider"].Speed = Value setupvalue(st, st[1]'Glider', glidersTable) end)
@@ -1226,7 +1229,6 @@ end, {text = 'Once'})
 windsh:Cheat("Button", "Spawn Drop", function()
     game.ReplicatedStorage.Events.WindShrineTrigger:FireServer()
 end, {text = 'Spawn'})
-windsh:Cheat("Label", "") windsh:Cheat("Label", "") windsh:Cheat("Label", "")
 
 local farmsettings = setttab:Sector("Autofarm Settings")
 -- farmsettings:Cheat("Textbox", "Autofarming Walkspeed", function(Value) kometa.vars.farmspeed = Value end, {placeholder = "Default Value = 60"})
@@ -1336,14 +1338,14 @@ fieldsettings:Cheat("Dropdown", "Field", function(Option) temptable.blackfield =
 fieldsettings:Cheat("Button", "Add Field To Blacklist", function() table.insert(kometa.blacklistedfields, temptable.blackfield) game:GetService("CoreGui").kometaUI.Container.Categories.Settings.L["Fields Settings"].Container["Blacklisted Fields"]:Destroy() fieldsettings:Cheat("Dropdown", "Blacklisted Fields", function(Option) end, {options = kometa.blacklistedfields}) end, {text = ' '})
 fieldsettings:Cheat("Button", "Remove Field From Blacklist", function() table.remove(kometa.blacklistedfields, api.tablefind(kometa.blacklistedfields, temptable.blackfield)) game:GetService("CoreGui").kometaUI.Container.Categories.Settings.L["Fields Settings"].Container["Blacklisted Fields"]:Destroy() fieldsettings:Cheat("Dropdown", "Blacklisted Fields", function(Option) end, {options = kometa.blacklistedfields}) end, {text = ' '})
 fieldsettings:Cheat("Dropdown", "Blacklisted Fields", function(Option) end, {options = kometa.blacklistedfields})
-local aqs = setttab:Sector("Auto Quest Settings")
-aqs:Cheat("Dropdown", "Do NPC Quests", function(Option) kometa.vars.npcprefer = Option end, {options = {'All Quests', 'Bucko Bee', 'Brown Bear', 'Riley Bee', 'Polar Bear'}})
-aqs:Cheat("Checkbox", "Teleport To NPC", function(State) kometa.toggles.tptonpc = State end)
 local pts = setttab:Sector("Autofarm Priority Tokens")
 pts:Cheat("Textbox", "Asset ID", function(Value) rarename = Value end, {placeholder = 'rbxassetid'})
 pts:Cheat("Button", "Add Token To Priority List", function() table.insert(kometa.priority, rarename) game:GetService("CoreGui").kometaUI.Container.Categories.Settings.L["Autofarm Priority Tokens"].Container["Priority List"]:Destroy() pts:Cheat("Dropdown", "Priority List", function(Option) end, {options = kometa.priority}) end, {text = ''})
 pts:Cheat("Button", "Remove Token From Priority List", function() table.remove(kometa.priority, api.tablefind(kometa.priority, rarename)) game:GetService("CoreGui").kometaUI.Container.Categories.Settings.L["Autofarm Priority Tokens"].Container["Priority List"]:Destroy() pts:Cheat("Dropdown", "Priority List", function(Option) end, {options = kometa.priority}) end, {text = ''})
 pts:Cheat("Dropdown", "Priority List", function(Option) end, {options = kometa.priority})
+local aqs = setttab:Sector("Auto Quest Settings")
+aqs:Cheat("Dropdown", "Do NPC Quests", function(Option) kometa.vars.npcprefer = Option end, {options = {'All Quests', 'Bucko Bee', 'Brown Bear', 'Riley Bee', 'Polar Bear'}})
+aqs:Cheat("Checkbox", "Teleport To NPC", function(State) kometa.toggles.tptonpc = State end)
 
 task.spawn(function() while task.wait() do
     if kometa.toggles.autofarm then

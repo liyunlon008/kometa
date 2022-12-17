@@ -150,10 +150,15 @@ function kometa.new(isdark, gprojectName, thinProject)
 	local theme = kometa.theme
 	local projectName = false
 	local thinMenu = false
+    local ContainerSize = UDim2.new(0, 900, 0, 350)
 	
 	if isdark == true then theme = kometa.dark_theme end
 	if gprojectName then projectName = gprojectName end
 	if thinProject then thinMenu = thinProject end
+    if thinProject and typeof(thinProject) == 'table' and thinProject[1] and thinProject[2] and thinProject[1] > 750 then
+        ContainerSize = UDim2.new(0, thinProject[1], 0, thinProject[2])
+        thinProject = nil
+    end
 	
 	local toggled = true
 	local typing = false
@@ -231,7 +236,7 @@ function kometa.new(isdark, gprojectName, thinProject)
 		BackgroundColor3 = theme.main_container,
 		BorderSizePixel = 0,
 		Position = UDim2.new(0.5, 0, 0.5, 0),
-		Size = UDim2.new(0, 900, 0, 350),
+		Size = ContainerSize,
 		ZIndex = 2,
 		ImageTransparency = 1
     })
@@ -433,6 +438,8 @@ function kometa.new(isdark, gprojectName, thinProject)
 				if uilistlayout2.AbsoluteContentSize.Y > largestListSize then
 					largestListSize = largestListSize
 				end
+
+				largestListSize = largestListSize + 200
 				
 				category.container.CanvasSize = UDim2.new(0, 0, 0, largestListSize + 5)
 			end
