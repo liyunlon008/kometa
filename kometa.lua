@@ -768,6 +768,7 @@ function collectplanters()
     -- end
     for i,v in pairs(planterst) do
         if v[1] == nil then continue end
+        print(v)
         planterToCollect = nil
         if kometa.planterssettings[1].Type == v[1] then 
             planterToCollect = kometa.planterssettings[1]
@@ -776,9 +777,10 @@ function collectplanters()
         elseif kometa.planterssettings[3].Type == v[1] then 
             planterToCollect = kometa.planterssettings[3]
         end
+        print(planterToCollect.Type)
         if planterToCollect == nil then continue end
         if planterToCollect.enabled then
-            if planterToCollect.growth <= v[4] then
+            if planterToCollect.growth < v[4] + 0.01 then
                 if v[3] and planterToCollect.safepuffs then
                     continue
                 end
