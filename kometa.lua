@@ -817,6 +817,7 @@ function plantplanters()
             -- if planterst[v.Type][1] == v.Type then continue end
             api.teleport(game:GetService("Workspace").FlowerZones:FindFirstChild(v.field).CFrame)
             task.wait(2)
+            api.teleport(game:GetService("Workspace").FlowerZones:FindFirstChild(v.field).CFrame)
             game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer({["Name"] = v.Type.." Planter"})
             task.wait(1)
         end
