@@ -424,14 +424,15 @@ function farmrares(v)
             decal = v:FindFirstChildOfClass("Decal") 
             if table.find(kometa.rares, string.split(decal.Texture, 'rbxassetid://')[2]) == nil and table.find(kometa.rares, string.split(decal.Texture, 'id=')[2]) == nil then return end
             temptable.collecting.rares = true
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.Position
-            task.wait(0.3) 
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position)
+            task.wait(0.2)
             temptable.float = false
             local i_tickets = 0
             repeat 
-		task.wait() 
+		task.wait()
                 api.humanoid().WalkSpeed = 25 
                 api.walkTo(v.Position)
+		task.wait(0.2)
                 i_tickets = i_tickets + 1
                 print(i_tickets)
             until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 5
