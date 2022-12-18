@@ -589,6 +589,7 @@ function makesprinklers()
 end
 
 function killmobs()
+    local timeout = 0
     for i,v in pairs(game:GetService("Workspace").MonsterSpawners:GetChildren()) do
         if v:FindFirstChild("Territory") then
             if v.Name ~= "Commando Chick" and v.Name ~= "CoconutCrab" and v.Name ~= "StumpSnail" and v.Name ~= "TunnelBear" and v.Name ~= "King Beetle Cave" and not v.Name:match("CaveMonster") and not v:FindFirstChild("TimerLabel", true).Visible then
@@ -600,8 +601,13 @@ function killmobs()
                     monsterpart = v.Territory.Value
                 end
                 api.humanoidrootpart().CFrame = monsterpart.CFrame
-                repeat api.humanoidrootpart().CFrame = monsterpart.CFrame avoidmob() task.wait(1) until v:FindFirstChild("TimerLabel", true).Visible or api.humanoid().Health == 0
-                for i = 1, 4 do gettoken(monsterpart.Position) end
+                repeat
+                api.humanoidrootpart().CFrame = monsterpart.CFrame
+                avoidmob()
+                task.wait(1)
+                timeout = timeout +1
+                until v:FindFirstChild("TimerLabel", true).Visible or api.humanoid().Health == 0 or timeout > 40
+                for i = 1, 10 do gettoken(monsterpart.Position) end
             end
         end
     end
@@ -1439,6 +1445,7 @@ task.spawn(function() while task.wait() do
             fieldposition = temptable.sprouts.coords.Position
             fieldpos = temptable.sprouts.coords
         end
+        local puffauto = 0
         if kometa.toggles.farmpuffshrooms and game.Workspace.Happenings.Puffshrooms:FindFirstChildOfClass("Model") then 
             if api.partwithnamepart("Mythic", game.Workspace.Happenings.Puffshrooms) then
                 temptable.magnitude = 25 
@@ -1489,6 +1496,7 @@ task.spawn(function() while task.wait() do
                             size0 = v_1.size.x
                             fieldpos = v_1.CFrame
                             fieldposition = fieldpos.Position
+                            puffauto = 1
                         end
                     end
                 end
@@ -1497,6 +1505,7 @@ task.spawn(function() while task.wait() do
         end
         if tonumber(pollenpercentage) < tonumber(kometa.vars.convertat) then
             if not temptable.tokensfarm then
+                if puffauto == 1 then for i = 0, 50 do gettoken(fieldposition) end end
                 api.tween(1, fieldpos)
                 task.wait(1)
                 temptable.tokensfarm = true
@@ -1523,6 +1532,7 @@ task.spawn(function() while task.wait() do
                     end
                 end
                 if (fieldposition-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > temptable.magnitude then
+                    if puffauto == 1 then for i = 0, 50 do gettoken(fieldposition) end end
                     api.teleport(fieldpos)
                     task.wait(1)
                     if kometa.toggles.autosprinkler then makesprinklers() end
