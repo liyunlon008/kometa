@@ -603,6 +603,9 @@ function killmobs()
                     monsterpart = game:GetService("Workspace").Territories.WerewolfPlateau.w
                 elseif v.Name:match("Mushroom") then
                     monsterpart = game:GetService("Workspace").Territories.MushroomZone.Part
+                elseif v.Name == "ForestMantis1" or v.Name == "ForestMantis2" then
+                    monsterpart = v.Territory.Value
+                    monsterpart.CFrame = CFrame.new(monsterpart.Position.X - 10, monsterpart.Position.Y, monsterpart.Position.Z)
                 else
                     monsterpart = v.Territory.Value
                 end
