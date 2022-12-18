@@ -1454,18 +1454,22 @@ task.spawn(function() while task.wait() do
                 temptable.magnitude = 25 
                 fieldpos = api.partwithnamepart("Mythic", game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
                 fieldposition = fieldpos.Position
+                puffauto = 1
             elseif api.partwithnamepart("Legendary", game.Workspace.Happenings.Puffshrooms) then
-                temptable.magnitude = 25 
+                temptable.magnitude = 25
                 fieldpos = api.partwithnamepart("Legendary", game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
                 fieldposition = fieldpos.Position
+                puffauto = 1
             elseif api.partwithnamepart("Epic", game.Workspace.Happenings.Puffshrooms) then
                 temptable.magnitude = 25 
                 fieldpos = api.partwithnamepart("Epic", game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
                 fieldposition = fieldpos.Position
+                puffauto = 1
             elseif api.partwithnamepart("Rare", game.Workspace.Happenings.Puffshrooms) then
                 temptable.magnitude = 25 
                 fieldpos = api.partwithnamepart("Rare", game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
                 fieldposition = fieldpos.Position
+                puffauto = 1
             else
                 temptable.magnitude = 25 
                 --fieldpos = api.getbiggestmodel(game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
@@ -1476,20 +1480,20 @@ task.spawn(function() while task.wait() do
                 local i = 0
                 local i_1 = 0
                 local fruits = {}
-		        for i,v in pairs(game:GetService("Workspace").Happenings.Puffshrooms:GetChildren()) do
-                --print(i)
+		for i,v in pairs(game:GetService("Workspace").Happenings.Puffshrooms:GetChildren()) do
+                    --print(i)
                     if v.Name:match("PuffballMushroomModelCommon") then
                         table.insert(fruits,v)
                     end
                 end
-		        for i = 1, table.getn(fruits) do
+		for i = 1, table.getn(fruits) do
                     --print(fruits[i])
                     for i_1,v_1 in pairs(fruits[i]:GetChildren()) do
                         if i_1 == 2 then
                            break
                         end
                         --print("--------")
-			            size1 = v_1.size.x
+			size1 = v_1.size.x
                         --print(size1)
                         task.wait(0.05)
                         --gettoken(fieldposition) 
@@ -1510,7 +1514,7 @@ task.spawn(function() while task.wait() do
             if not temptable.tokensfarm then
                 if puffauto == 1 then
                    for i = 0, 50 do 
-                       gettoken(fieldposition)
+                       gettoken(api.humanoidrootpart().CFrame.Position)
                    end
                 end
                 api.tween(1, fieldpos)
@@ -1541,7 +1545,7 @@ task.spawn(function() while task.wait() do
                 if (fieldposition-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > temptable.magnitude then
                 if puffauto == 1 then
                     for i = 0, 50 do 
-                        gettoken(fieldposition)
+                        gettoken(api.humanoidrootpart().CFrame.Position)
                     end
                 end
                     api.teleport(fieldpos)
