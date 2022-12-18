@@ -429,9 +429,9 @@ function farmrares(v)
             temptable.float = false
             local i_tickets = 0
             repeat 
+		task.wait() 
                 api.humanoid().WalkSpeed = 25 
                 api.walkTo(v.Position)
-                task.wait(0.3)
                 i_tickets = i_tickets + 1
                 print(i_tickets)
             until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 5
