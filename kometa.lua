@@ -1508,7 +1508,11 @@ task.spawn(function() while task.wait() do
         end
         if tonumber(pollenpercentage) < tonumber(kometa.vars.convertat) then
             if not temptable.tokensfarm then
-                if puffauto == 1 then for i = 0, 50 do getlinktoken() gettoken() end end
+                if puffauto == 1 then
+                   for i = 0, 50 do 
+                       gettoken(fieldposition)
+                   end
+                end
                 api.tween(1, fieldpos)
                 task.wait(1)
                 temptable.tokensfarm = true
@@ -1529,13 +1533,17 @@ task.spawn(function() while task.wait() do
                         for i = 0, 50 do 
                             gettoken(CFrame.new(73.2, 176.35, -167).Position) 
                         end 
-                        enableall() 
+                        enableall()
                         api.tween(2, fieldpos) 
                         temptable.started.mondo = false
                     end
                 end
                 if (fieldposition-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > temptable.magnitude then
-                    if puffauto == 1 then for i = 0, 50 do getlinktoken() gettoken() end end
+                if puffauto == 1 then
+                    for i = 0, 50 do 
+                        gettoken(fieldposition)
+                    end
+                end
                     api.teleport(fieldpos)
                     task.wait(1)
                     if kometa.toggles.autosprinkler then makesprinklers() end
