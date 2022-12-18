@@ -489,6 +489,9 @@ function gettoken(v3)
     for e,r in next, game:GetService("Workspace").Collectibles:GetChildren() do
         itb = false
         if r:FindFirstChildOfClass("Decal") and kometa.toggles.enabletokenblacklisting then
+            if api.findvalue(kometa.bltokens, string.split(r:FindFirstChildOfClass("Decal").Texture, 'id=')[2]) then
+                itb = true
+            end
             if api.findvalue(kometa.bltokens, string.split(r:FindFirstChildOfClass("Decal").Texture, 'rbxassetid://')[2]) then
                 itb = true
             end
@@ -1505,7 +1508,7 @@ task.spawn(function() while task.wait() do
         end
         if tonumber(pollenpercentage) < tonumber(kometa.vars.convertat) then
             if not temptable.tokensfarm then
-                if puffauto == 1 then for i = 0, 50 do gettoken(fieldposition) end end
+                if puffauto == 1 then for i = 0, 50 do getlinktoken() gettoken() end end
                 api.tween(1, fieldpos)
                 task.wait(1)
                 temptable.tokensfarm = true
@@ -1532,7 +1535,7 @@ task.spawn(function() while task.wait() do
                     end
                 end
                 if (fieldposition-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > temptable.magnitude then
-                    if puffauto == 1 then for i = 0, 50 do gettoken(fieldposition) end end
+                    if puffauto == 1 then for i = 0, 50 do getlinktoken() gettoken() end end
                     api.teleport(fieldpos)
                     task.wait(1)
                     if kometa.toggles.autosprinkler then makesprinklers() end
