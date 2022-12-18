@@ -1498,6 +1498,7 @@ task.spawn(function() while task.wait() do
         if tonumber(pollenpercentage) < tonumber(kometa.vars.convertat) then
             if not temptable.tokensfarm then
                 api.tween(1, fieldpos)
+                task.wait(1)
                 temptable.tokensfarm = true
                 if kometa.toggles.autosprinkler then makesprinklers() end
             else
@@ -1523,6 +1524,7 @@ task.spawn(function() while task.wait() do
                 end
                 if (fieldposition-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > temptable.magnitude then
                     api.teleport(fieldpos)
+                    task.wait(1)
                     if kometa.toggles.autosprinkler then makesprinklers() end
                 end
                 getprioritytokens()
