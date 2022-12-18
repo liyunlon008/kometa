@@ -1244,7 +1244,7 @@ local raresettings = setttab:Sector("Tokens Settings")
 raresettings:Cheat("Textbox", "Asset ID", function(Value) rarename = Value end, {placeholder = 'rbxassetid'})
 raresettings:Cheat("Button", "Add Rare", function()
     table.insert(kometa.rares, rarename)
-    game.CoreGui.kometaUI.Container.Categories.Settings.L["Tokens Settings"].Container["Rares List"]:Destroy()
+    game.CoreGui.kometaUI.Container.Categories.Settings:FindFirstChild("Tokens Settings", true).Container["Rares List"]:Destroy()
     raresettings:Cheat("Dropdown", "Rares List", function(Option)
     end, {
         options = kometa.rares
@@ -1252,7 +1252,7 @@ raresettings:Cheat("Button", "Add Rare", function()
 end, {text = 'Add'})
 raresettings:Cheat("Button", "Remove Rare", function()
     table.remove(kometa.rares, api.tablefind(kometa.rares, rarename))
-    game.CoreGui.kometaUI.Container.Categories.Settings.L["Tokens Settings"].Container["Rares List"]:Destroy()
+    game.CoreGui.kometaUI.Container.Categories.Settings:FindFirstChild("Tokens Settings", true).Container["Rares List"]:Destroy()
     raresettings:Cheat("Dropdown", "Rares List", function(Option)
     end, {
         options = kometa.rares
@@ -1260,7 +1260,7 @@ raresettings:Cheat("Button", "Remove Rare", function()
 end, {text = 'Remove'})
 raresettings:Cheat("Button", "Add To Blacklist", function()
     table.insert(kometa.bltokens, rarename)
-    game.CoreGui.kometaUI.Container.Categories.Settings.L["Tokens Settings"].Container["Tokens Blacklist"]:Destroy()
+    game.CoreGui.kometaUI.Container.Categories.Settings:FindFirstChild("Tokens Settings", true).Container["Tokens Blacklist"]:Destroy()
     raresettings:Cheat("Dropdown", "Tokens Blacklist", function(Option)
     end, {
         options = kometa.bltokens
@@ -1268,7 +1268,7 @@ raresettings:Cheat("Button", "Add To Blacklist", function()
 end, {text = 'Add'})
 raresettings:Cheat("Button", "Remove From Blacklist", function()
     table.remove(kometa.bltokens, api.tablefind(kometa.bltokens, rarename))
-    game.CoreGui.kometaUI.Container.Categories.Settings.L["Tokens Settings"].Container["Tokens Blacklist"]:Destroy()
+    game.CoreGui.kometaUI.Container.Categories.Settings:FindFirstChild("Tokens Settings", true).Container["Tokens Blacklist"]:Destroy()
     raresettings:Cheat("Dropdown", "Tokens Blacklist", function(Option)
     end, {
         options = kometa.bltokens
