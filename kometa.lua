@@ -614,10 +614,10 @@ function killmobs()
                 repeat
                     api.humanoidrootpart().CFrame = monsterpart.CFrame
                     avoidmob()
-                    task.wait(1)
+                    task.wait(1.6)
                     timeout = timeout + 1
-                    if kometa.toggles.farmpuffshrooms and game.Workspace.Happenings.Puffshrooms:FindFirstChildOfClass("Model") then timeout = 41 end
-                until v:FindFirstChild("TimerLabel", true).Visible or api.humanoid().Health == 0 or timeout > 40 or kometa.toggles.autokillmobs == false or temptable.started.windy == true
+                    if kometa.toggles.farmpuffshrooms and game.Workspace.Happenings.Puffshrooms:FindFirstChildOfClass("Model") then timeout = 31 end
+                until v:FindFirstChild("TimerLabel", true).Visible or api.humanoid().Health == 0 or timeout > 30 or kometa.toggles.autokillmobs == false or temptable.started.windy == true
                 for i = 1, 10 do gettoken(monsterpart.Position) end
             end
         end
