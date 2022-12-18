@@ -404,7 +404,7 @@ function farmtickets(v)
             decal = v:FindFirstChildOfClass("Decal") 
             if decal.Texture ~= "1674871631" and decal.Texture ~= "rbxassetid://1674871631" then return end
             temptable.collecting.tickets = true
-            temptable.float = true
+            temptable.float = false
             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(20, 0, 0) 
             task.wait(.1) 
             repeat 
@@ -422,16 +422,19 @@ function farmrares(v)
     if kometa.toggles.farmrares then 
         if v.CFrame.YVector.Y == 1 and v.Transparency < 0.9 and v ~= nil and v.Parent ~= nil then
             decal = v:FindFirstChildOfClass("Decal") 
-            if not table.find(kometa.rares, string.split(decal.Texture, 'rbxassetid://')[2]) then return end
+            if table.find(kometa.rares, string.split(decal.Texture, 'rbxassetid://')[2]) == nil and table.find(kometa.rares, string.split(decal.Texture, 'id=')[2]) == nil then return end
             temptable.collecting.rares = true
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(20, 0, 0) 
-            task.wait(.1) 
-            temptable.float = true
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.Position
+            task.wait(0.3) 
+            temptable.float = false
+            local i_tickets = 0
             repeat 
-                task.wait() 
                 api.humanoid().WalkSpeed = 25 
                 api.walkTo(v.Position)
-            until not v.Parent or v.CFrame.YVector.Y ~= 1 
+                task.wait(0.3)
+                i_tickets = i_tickets + 1
+                print(i_tickets)
+            until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 5
             temptable.collecting.rares = false
             if temptable.float then temptable.float = false end
         end 
@@ -1454,8 +1457,41 @@ task.spawn(function() while task.wait() do
                 fieldposition = fieldpos.Position
             else
                 temptable.magnitude = 25 
-                fieldpos = api.getbiggestmodel(game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
-                fieldposition = fieldpos.Position
+                --fieldpos = api.getbiggestmodel(game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
+                --fieldposition = fieldpos.Position
+                --print("00000")
+                local size0 = 0
+                local size1 = 0
+                local i = 0
+                local i_1 = 0
+                local fruits = {}
+		        for i,v in pairs(game:GetService("Workspace").Happenings.Puffshrooms:GetChildren()) do
+                --print(i)
+                    if v.Name:match("PuffballMushroomModelCommon") then
+                        table.insert(fruits,v)
+                    end
+                end
+		        for i = 1, table.getn(fruits) do
+                    --print(fruits[i])
+                    for i_1,v_1 in pairs(fruits[i]:GetChildren()) do
+                        if i_1 == 2 then
+                           break
+                        end
+                        --print("--------")
+			            size1 = v_1.size.x
+                        --print(size1)
+                        task.wait(0.05)
+                        --gettoken(fieldposition) 
+                        --print(v_1.size.x)
+                        --print("--------")
+                        if v_1.size.x > size0 and v_1.size.x == size1 then
+                            size0 = v_1.size.x
+                            fieldpos = v_1.CFrame
+                            fieldposition = fieldpos.Position
+                        end
+                    end
+                end
+                --print("22222")
             end
         end
         if tonumber(pollenpercentage) < tonumber(kometa.vars.convertat) then
