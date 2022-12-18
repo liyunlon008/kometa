@@ -435,7 +435,7 @@ function farmrares(v)
 		task.wait(0.2)
                 i_tickets = i_tickets + 1
                 print(i_tickets)
-            until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 5
+            until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 3
             temptable.collecting.rares = false
             if temptable.float then temptable.float = false end
         end 
