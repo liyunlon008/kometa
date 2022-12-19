@@ -387,12 +387,15 @@ function farmtickets(v)
             temptable.float = false
             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position)
             task.wait(0.1)
+            local i_tickets = 0
             repeat
                 task.wait()
                 api.humanoid().WalkSpeed = 25
                 api.walkTo(v.Position)
-            until not v.Parent or v.CFrame.YVector.Y ~= 1
-            task.wait(0.3)
+                task.wait(0.1)
+                i_tickets = i_tickets + 1
+            until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 3
+            task.wait(0.1)
             temptable.collecting.tickets = false
             if temptable.float then temptable.float = false end
         end
