@@ -610,7 +610,7 @@ function killmobs()
                 elseif v.Name == "ForestMantis1" or v.Name == "ForestMantis2" then
                     monsterpart = v.Territory.Value
                     --print(api.humanoidrootpart().CFrame)
-                    monsterpart.CFrame = CFrame.new(-350, 80, -187)
+                    monsterpart.CFrame = CFrame.new(-340, 80, -187)
                 else
                     monsterpart = v.Territory.Value
                 end
@@ -619,12 +619,10 @@ function killmobs()
                 repeat
                     api.humanoidrootpart().CFrame = monsterpart.CFrame
                     avoidmob()
-                    task.wait(1.5)
-                    api.humanoid():MoveTo(monsterpart.Position)
-                    task.wait(0.2)
+                    task.wait(2)
                     timeout = timeout + 1
-                    if kometa.toggles.farmpuffshrooms and game.Workspace.Happenings.Puffshrooms:FindFirstChildOfClass("Model") then timeout = 25 end
-                until v:FindFirstChild("TimerLabel", true).Visible or api.humanoid().Health == 0 or timeout > 24 or kometa.toggles.autokillmobs == false or temptable.started.windy == true
+                    if kometa.toggles.farmpuffshrooms and game.Workspace.Happenings.Puffshrooms:FindFirstChildOfClass("Model") then timeout = 60 end
+                until v:FindFirstChild("TimerLabel", true).Visible or api.humanoid().Health == 0 or timeout > 21 or kometa.toggles.autokillmobs == false or temptable.started.windy == true
                 for i = 1, 10 do gettoken(monsterpart.Position) end
             end
         end
