@@ -1178,7 +1178,7 @@ raresettings:Cheat("Button", "Add Rare", function()
     game.CoreGui.kometaUI.Container.Categories.Settings:FindFirstChild("Tokens Settings", true).Container["Rares List"]:Destroy()
     raresettings:Cheat("Dropdown", "Rares List", function(Option)
     end, {
-        options = kometa 
+        options = kometa.rares
     })
 end, { text = 'Add' })
 raresettings:Cheat("Button", "Remove Rare", function()
@@ -1186,7 +1186,7 @@ raresettings:Cheat("Button", "Remove Rare", function()
     game.CoreGui.kometaUI.Container.Categories.Settings:FindFirstChild("Tokens Settings", true).Container["Rares List"]:Destroy()
     raresettings:Cheat("Dropdown", "Rares List", function(Option)
     end, {
-        options = kometa 
+        options = kometa.rares
     })
 end, { text = 'Remove' })
 raresettings:Cheat("Button", "Add To Blacklist", function()
@@ -1194,7 +1194,7 @@ raresettings:Cheat("Button", "Add To Blacklist", function()
     game.CoreGui.kometaUI.Container.Categories.Settings:FindFirstChild("Tokens Settings", true).Container["Tokens Blacklist"]:Destroy()
     raresettings:Cheat("Dropdown", "Tokens Blacklist", function(Option)
     end, {
-        options = kometa.bl 
+        options = kometa.bltokens
     })
 end, { text = 'Add' })
 raresettings:Cheat("Button", "Remove From Blacklist", function()
@@ -1202,7 +1202,7 @@ raresettings:Cheat("Button", "Remove From Blacklist", function()
     game.CoreGui.kometaUI.Container.Categories.Settings:FindFirstChild("Tokens Settings", true).Container["Tokens Blacklist"]:Destroy()
     raresettings:Cheat("Dropdown", "Tokens Blacklist", function(Option)
     end, {
-        options = kometa.bl 
+        options = kometa.bltokens
     })
 end, { text = 'Remove' })
 raresettings:Cheat("Dropdown", "Tokens Blacklist", function(Option) end, { options = kometa.bltokens })
