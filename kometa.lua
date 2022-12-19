@@ -591,7 +591,6 @@ function killmobs()
                 timeout = 0
                 repeat
                     api.humanoidrootpart().CFrame = monsterpart.CFrame
-                    print(api.humanoidrootpart().CFrame)
                     avoidmob()
                     task.wait(1.5)
                     timeout = timeout + 1
@@ -654,7 +653,6 @@ function findvalue(table, value)
 end
 
 function getplanters()
-    print("huapen1")
     table.clear(planterst.plantername)
     table.clear(planterst.planterid)
     for i, v in pairs(debug.getupvalues(require(game:GetService("ReplicatedStorage").LocalPlanters).LoadPlanter)[4]) do
@@ -663,7 +661,6 @@ function getplanters()
             table.insert(planterst.planterid, v.ActorID)
         end
     end
-    print("huapen1jieshu")
 end
 
 function findclosestballoon()
@@ -750,7 +747,6 @@ function farmant()
 end
 
 function collectplanters()
-    print("huapen")
     getplanters()
     for i, v in pairs(planterst.plantername) do
         if api.partwithnamepart(v, game:GetService("Workspace").Planters) and api.partwithnamepart(v, game:GetService("Workspace").Planters):FindFirstChild("Soil") then
@@ -763,7 +759,6 @@ function collectplanters()
             task.wait(2)
         end
     end
-    print("huapenjieshu")
 end
 
 
