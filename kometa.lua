@@ -385,13 +385,14 @@ function farmtickets(v)
             if decal.Texture ~= "1674871631" and decal.Texture ~= "rbxassetid://1674871631" then return end
             temptable.collecting.tickets = true
             temptable.float = false
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(20, 0, 0)
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position)
             task.wait(0.1)
             repeat
                 task.wait()
                 api.humanoid().WalkSpeed = 25
                 api.walkTo(v.Position)
             until not v.Parent or v.CFrame.YVector.Y ~= 1
+            task.wait(0.3)
             temptable.collecting.tickets = false
             if temptable.float then temptable.float = false end
         end
@@ -583,7 +584,7 @@ function killmobs()
                 elseif v.Name == "ForestMantis1" or v.Name == "ForestMantis2" then
                     monsterpart = v.Territory.Value
                     --print(api.humanoidrootpart().CFrame)
-                    monsterpart.CFrame = CFrame.new(-300, 65, -187)
+                    monsterpart.CFrame = CFrame.new(-350, 80, -187)
                 else
                     monsterpart = v.Territory.Value
                 end
