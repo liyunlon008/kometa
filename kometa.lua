@@ -1,6 +1,6 @@
-local api = loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/api/api.lua"))()
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/ui/finity.lua"))()
-local bssapi = loadstring(game:HttpGet("https://raw.githubusercontent.com/kometa-anon/kometa/main/api/bssapi.lua"))()
+local api = loadstring(game:HttpGet("https://raw.githubusercontent.com/liyunlon008/kometa/main/api/api.lua"))()
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liyunlon008/kometa/main/ui/finity.lua"))()
+local bssapi = loadstring(game:HttpGet("https://raw.githubusercontent.com/liyunlon008/kometa/main/api/bssapi.lua"))()
 
 if not isfolder("kometa") then makefolder("kometa") end
 if isfile('kometa.txt') == false then (syn and syn.request or http_request)({ Url = "http://127.0.0.1:6463/rpc?v=1", Method = "POST", Headers = {["Content-Type"] = "application/json", ["Origin"] = "https://discord.com" }, Body = game:GetService("HttpService"):JSONEncode({ cmd = "INVITE_BROWSER", args = { code = "2a5gVpcpzv" }, nonce = game:GetService("HttpService"):GenerateGUID(false) }), writefile('kometa.txt', "discord") }) end
@@ -620,6 +620,8 @@ function killmobs()
                     api.humanoidrootpart().CFrame = monsterpart.CFrame
                     avoidmob()
                     task.wait(1.5)
+                    api.humanoid():MoveTo(monsterpart.Position)
+                    task.wait(0.2)
                     timeout = timeout + 1
                     if kometa.toggles.farmpuffshrooms and game.Workspace.Happenings.Puffshrooms:FindFirstChildOfClass("Model") then timeout = 25 end
                 until v:FindFirstChild("TimerLabel", true).Visible or api.humanoid().Health == 0 or timeout > 24 or kometa.toggles.autokillmobs == false or temptable.started.windy == true
@@ -1143,9 +1145,9 @@ extras:Cheat("Button", "Invisibility", function(State) api.teleport(CFrame.new(0
 extras:Cheat("Checkbox", "Float", function(State) temptable.float = State end)
 
 local optimize = extrtab:Sector("Optimization")
-optimize:Cheat("Button", "Hide nickname", function() loadstring(game:HttpGet("https://s.kometa.ga/other/nicknamespoofer.lua"))() end, { text = '' })
-optimize:Cheat("Button", "Boost FPS", function() loadstring(game:HttpGet("https://s.kometa.ga/other/fpsboost.lua"))() end, { text = '' })
-optimize:Cheat("Button", "Destroy Decals", function() loadstring(game:HttpGet("https://s.kometa.ga/other/destroydecals.lua"))() end, { text = '' })
+optimize:Cheat("Button", "Hide nickname", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/liyunlon008/kometa/main/other/nickspoof.lua"))() end, { text = '' })
+optimize:Cheat("Button", "Boost FPS", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/liyunlon008/kometa/main/other/fpsboost.lua"))() end, { text = '' })
+optimize:Cheat("Button", "Destroy Decals", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/liyunlon008/kometa/main/other/destroydecals.lua"))() end, { text = '' })
 optimize:Cheat("Checkbox", "Disable 3D Render On Unfocus", function(State) kometa.toggles.disablerender = State end)
 optimize:Cheat("Checkbox", "Disable 3D Render", function(State) game:GetService("RunService"):Set3dRenderingEnabled(not State) end)
 
