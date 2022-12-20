@@ -603,7 +603,7 @@ function killmobs()
                 elseif v.Name == "ForestMantis1" or v.Name == "ForestMantis2" then
                     monsterpart = v.Territory.Value
                     --print(api.humanoidrootpart().CFrame)
-                    monsterpart.CFrame = CFrame.new(-320, 100, -187)
+                    monsterpart.CFrame = CFrame.new(-305, 69, -155)
                 else
                     monsterpart = v.Territory.Value
                 end
