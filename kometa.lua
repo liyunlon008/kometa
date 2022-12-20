@@ -334,13 +334,6 @@ local kometa = {
         mutation = "Convert Amount",
         umb = false
     },
-    webhooking = {
-        convert = false,
-        vicious = false,
-        windy = false,
-        playeradded = false,
-        connectionlost = false
-    },
 }
 
 local kometawebhook = {
@@ -392,9 +385,9 @@ function farmtickets(v)
                 task.wait()
                 api.humanoid().WalkSpeed = 25
                 api.walkTo(v.Position)
-                task.wait(0.1)
+                task.wait(0.2)
                 i_tickets = i_tickets + 1
-            until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 3
+            until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 4
             task.wait(0.1)
             temptable.collecting.tickets = false
             if temptable.float then temptable.float = false end
@@ -610,7 +603,7 @@ function killmobs()
                 elseif v.Name == "ForestMantis1" or v.Name == "ForestMantis2" then
                     monsterpart = v.Territory.Value
                     --print(api.humanoidrootpart().CFrame)
-                    monsterpart.CFrame = CFrame.new(-340, 80, -187)
+                    monsterpart.CFrame = CFrame.new(-320, 100, -187)
                 else
                     monsterpart = v.Territory.Value
                 end
@@ -980,7 +973,12 @@ function makequests()
                                     task.wait(2)
                                 end
                             end
-                        end end end end end end)
+                        end
+                    end
+                end
+            end
+        end
+    end)
 end
 
 local ui = library.new(true, "kometa ☄️ | " .. temptable.version, _G.size or UDim2.new(0, 550, 0, 500))
@@ -1120,13 +1118,7 @@ miscc:Cheat("Checkbox", "Godmode", function(State) kometa.toggles.godmode = Stat
     else bssapi:Godmode(false) end end)
 miscc:Cheat("Checkbox", "Always Visual Night", function(State) kometa.toggles.visualnight = State end)
 
-local webhooking = misctab:Sector("Discord Webhooking")
-webhooking:Cheat("Textbox", "Webhook", function(Value) kometawebhook.webhook = Value end, { placeholder = ' ' })
-webhooking:Cheat("Button", "Remind Webhook", function() api.notify('kometa', 'Your webhook is ' .. kometawebhook.webhook) end, { text = '' })
-webhooking:Cheat("Checkbox", "Send After Converting", function(State) kometa.webhooking.convert = State end)
-webhooking:Cheat("Checkbox", "Send On Vicious", function(State) kometa.webhooking.vicious = State end)
-webhooking:Cheat("Checkbox", "Send On Windy", function(State) kometa.webhooking.windy = State end)
-webhooking:Cheat("Checkbox", "Send When Player Joins Server", function(State) kometa.webhooking.playeradded = State end)
+
 
 local misco = misctab:Sector("Other")
 misco:Cheat("Dropdown", "Equip Accesories", function(Option) local ohString1 = "Equip" local ohTable2 = {["Mute"] = false, ["Type"] = Option, ["Category"] = "Accessory" } game:GetService("ReplicatedStorage").Events.ItemPackageEvent:InvokeServer(ohString1, ohTable2) end, { options = accesoriestable })
@@ -1318,6 +1310,7 @@ game.Workspace.Particles.ChildAdded:Connect(function(v)
 end)
 
 task.spawn(function() while task.wait() do
+        print("zxc")
         if temptable.collecting.tickets then continue end
         if temptable.collecting.rares then continue end
         if kometa.toggles.autofarm then
@@ -1329,6 +1322,7 @@ task.spawn(function() while task.wait() do
                 pollenpercentage = pollencount / maxpollen * 100
                 fieldselected = game:GetService("Workspace").FlowerZones[kometa.vars.field]
                 if kometa.toggles.autodoquest then
+                    print("autodoquest")
                     if game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Menus.Children.Quests.Content:FindFirstChild("Frame") then
                         for i, v in next, game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Menus.Children.Quests:GetDescendants() do
                             if v.Name == "Description" then
@@ -1369,6 +1363,7 @@ task.spawn(function() while task.wait() do
                 end
                 local puffauto = 0
                 if kometa.toggles.farmpuffshrooms and game.Workspace.Happenings.Puffshrooms:FindFirstChildOfClass("Model") then
+                    print("Model")
                     if api.partwithnamepart("Mythic", game.Workspace.Happenings.Puffshrooms) then
                         temptable.magnitude = 25
                         fieldpos = api.partwithnamepart("Mythic", game.Workspace.Happenings.Puffshrooms):FindFirstChild("Puffball Stem").CFrame
@@ -1400,24 +1395,17 @@ task.spawn(function() while task.wait() do
                         local i_1 = 0
                         local fruits = {}
                         for i, v in pairs(game:GetService("Workspace").Happenings.Puffshrooms:GetChildren()) do
-                            --print(i)
                             if v.Name:match("PuffballMushroomModelCommon") then
                                 table.insert(fruits, v)
                             end
                         end
                         for i = 1, table.getn(fruits) do
-                            --print(fruits[i])
                             for i_1, v_1 in pairs(fruits[i]:GetChildren()) do
                                 if i_1 == 2 then
                                     break
                                 end
-                                --print("--------")
                                 size1 = v_1.size.x
-                                --print(size1)
                                 task.wait(0.05)
-                                --gettoken(fieldposition) 
-                                --print(v_1.size.x)
-                                --print("--------")
                                 if v_1.size.x > size0 and v_1.size.x == size1 then
                                     size0 = v_1.size.x
                                     fieldpos = v_1.CFrame
@@ -1430,9 +1418,10 @@ task.spawn(function() while task.wait() do
                     end
                 end
                 if tonumber(pollenpercentage) < tonumber(kometa.vars.convertat) then
+                    print(" < ")
                     if not temptable.tokensfarm then
                         if puffauto == 1 then
-                            for i = 0, 50 do
+                            for i = 0, 10 do
                                 gettoken(api.humanoidrootpart().CFrame.Position)
                             end
                         end
@@ -1463,7 +1452,7 @@ task.spawn(function() while task.wait() do
                         end
                         if (fieldposition - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > temptable.magnitude then
                             if puffauto == 1 then
-                                for i = 0, 50 do
+                                for i = 0, 10 do
                                     gettoken(api.humanoidrootpart().CFrame.Position)
                                 end
                             end
@@ -1481,27 +1470,31 @@ task.spawn(function() while task.wait() do
                         if not kometa.toggles.farmflower then getflower() end
                     end
                 elseif tonumber(pollenpercentage) >= tonumber(kometa.vars.convertat) then
+                    print(">=")
                     temptable.tokensfarm = false
                     api.tween(1, game:GetService("Players").LocalPlayer.SpawnPos.Value * CFrame.fromEulerAnglesXYZ(0, 110, 0) + Vector3.new(0, 0, 9))
                     temptable.converting = true
+                    local shijian = 0
                     repeat
+                        task.wait(1)
                         converthoney()
-                    until game.Players.LocalPlayer.CoreStats.Pollen.Value == 0
+                        shijian = shijian + 1
+                    until game.Players.LocalPlayer.CoreStats.Pollen.Value == 0 or shijian > 100
                     if kometa.toggles.convertballoons and gethiveballoon() then
                         task.wait(6)
+                        local shijian = 0
                         repeat
-                            task.wait()
+                            task.wait(1)
                             converthoney()
-                        until gethiveballoon() == false or not kometa.toggles.convertballoons
+                            shijian = shijian + 1
+                        until gethiveballoon() == false or not kometa.toggles.convertballoons or shijian > 100
                     end
                     temptable.converting = false
                     temptable.act = temptable.act + 1
-                    if kometa.webhooking.convert then api.imagehook(kometawebhook.webhook, "Total Honey: `" .. game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.MeterHUD.HoneyMeter.Bar.TextLabel.Text .. "`\nGained Honey: `" .. api.suffixstring(temptable.honeycurrent - temptable.honeystart) .. "`\nElapsed Time: `" .. api.toHMS(temptable.stats.runningfor) .. "`", "kometa ☄️", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/f/f6/HoneyDrop.png/revision/latest/scale-to-width-down/90?cb=20200521143648&path-prefix=ru") end
                     task.wait(6)
                     if kometa.toggles.autoant and not game:GetService("Workspace").Toys["Ant Challenge"].Busy.Value and rtsg().Eggs.AntPass > 0 then farmant() end
                     if kometa.toggles.autoquest then makequests() end
                     if kometa.toggles.autoplanters then collectplanters() end
-                    --plantplanters()
                     if kometa.toggles.autokillmobs then
                         if temptable.act >= kometa.vars.monstertimer then
                             temptable.started.monsters = true
@@ -1512,7 +1505,9 @@ task.spawn(function() while task.wait() do
                     end
                 end
             end
-        end end end)
+        end
+    end
+end)
 
 task.spawn(function()
     while task.wait(1) do
@@ -1599,23 +1594,13 @@ game:GetService("Workspace").Particles.Folder2.ChildRemoved:Connect(function(chi
     if kometa.toggles.farmsprouts then temptable.stats.farmedsprouts = temptable.stats.farmedsprouts + 1 end
 end)
 
-Workspace.Particles.ChildAdded:Connect(function(instance)
-    if string.find(instance.Name, "Vicious") then
-        temptable.detected.vicious = true
-        if kometa.webhooking.vicious then api.imagehook(kometawebhook.webhook, "Vicious Bee detected!", "kometa ☄️", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/1/1f/Vicious_Bee.png/revision/latest/scale-to-width-down/350?cb=20181130115012&path-prefix=ru") end
-    end
-end)
+
 Workspace.Particles.ChildRemoved:Connect(function(instance)
     if string.find(instance.Name, "Vicious") then
         temptable.detected.vicious = false
     end
 end)
-game:GetService("Workspace").NPCBees.ChildAdded:Connect(function(v)
-    if v.Name == "Windy" then
-        task.wait(3) temptable.windy = v temptable.detected.windy = true
-        if kometa.webhooking.windy then api.imagehook(kometawebhook.webhook, "Windy Bee detected!", "kometa ☄️", "https://static.wikia.nocookie.net/bee-swarm-simulator/images/8/85/Windy_Bee.png/revision/latest?cb=20200404000105") end
-    end
-end)
+
 game:GetService("Workspace").NPCBees.ChildRemoved:Connect(function(v)
     if v.Name == "Windy" then
         task.wait(3) temptable.windy = nil temptable.detected.windy = false
@@ -1760,11 +1745,10 @@ task.spawn(function() while task.wait() do
                 end
             end
         end
-    end end)
-
-game.Players.PlayerAdded:Connect(function(player)
-    if kometa.webhooking.playeradded then api.imagehook(kometawebhook.webhook, player.Name .. " joined your server", "kometa ☄️", "https://www.roblox.com/headshot-thumbnail/image?userId=" .. player.UserId .. "&width=420&height=420&format=png") end
+    end
 end)
+
+
 
 game.Workspace.Collectibles.ChildAdded:Connect(function(token)
     if kometa.toggles.farmtickets and temptable.collecting.tickets == false then farmtickets(token) end
