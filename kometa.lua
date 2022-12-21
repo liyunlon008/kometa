@@ -600,19 +600,19 @@ function killmobs()
                     monsterpart = game:GetService("Workspace").Territories.WerewolfPlateau.w
                 elseif v.Name:match("Mushroom") then
                     monsterpart = game:GetService("Workspace").Territories.MushroomZone.Part
-                elseif v.Name == "ForestMantis1" or v.Name == "ForestMantis2" then
-                    monsterpart = v.Territory.Value
-                    --print(api.humanoidrootpart().CFrame)
-                    monsterpart.CFrame = CFrame.new(-305, 69, -155)
                 else
                     monsterpart = v.Territory.Value
                 end
                 api.humanoidrootpart().CFrame = monsterpart.CFrame
                 timeout = 0
                 repeat
-                    api.humanoidrootpart().CFrame = monsterpart.CFrame
+                    if v.Name == "ForestMantis1" or v.Name == "ForestMantis2" then
+                        api.humanoidrootpart().CFrame = CFrame.new(-339, 69, -149)
+                    else
+                        api.humanoidrootpart().CFrame = monsterpart.CFrame
+                    end
                     avoidmob()
-                    task.wait(2)
+                    task.wait(1.6)
                     timeout = timeout + 1
                     if kometa.toggles.farmpuffshrooms and game.Workspace.Happenings.Puffshrooms:FindFirstChildOfClass("Model") then timeout = 60 end
                 until v:FindFirstChild("TimerLabel", true).Visible or api.humanoid().Health == 0 or timeout > 21 or kometa.toggles.autokillmobs == false or temptable.started.windy == true
@@ -1420,54 +1420,81 @@ task.spawn(function() while task.wait() do
                 if tonumber(pollenpercentage) < tonumber(kometa.vars.convertat) then
                     print(" < ")
                     if not temptable.tokensfarm then
+                        print(1)
                         if puffauto == 1 then
+                            print(2)
                             for i = 0, 10 do
+                                print(3)
                                 gettoken(api.humanoidrootpart().CFrame.Position)
                             end
                         end
+                        print(4)
                         api.tween(1, fieldpos)
+                        print(5)
                         task.wait(1)
+                        print(6)
                         temptable.tokensfarm = true
+                        print(7)
                         if kometa.toggles.autosprinkler then makesprinklers() end
+                        print(8)
                     else
+                        print(9)
                         if kometa.toggles.killmondo then
+                            print(10)
                             while kometa.toggles.killmondo and game.Workspace.Monsters:FindFirstChild("Mondo Chick (Lvl 8)") and not temptable.started.vicious and not temptable.started.monsters do
+                                print(11)
                                 temptable.started.mondo = true
                                 while game.Workspace.Monsters:FindFirstChild("Mondo Chick (Lvl 8)") do
+                                    print(12)
                                     disableall()
                                     game:GetService("Workspace").Map.Ground.HighBlock.CanCollide = false
                                     mondopition = game.Workspace.Monsters["Mondo Chick (Lvl 8)"].Head.Position
+                                    print(13)
                                     api.tween(1, CFrame.new(mondopition.x, mondopition.y - 60, mondopition.z))
                                     task.wait(1)
                                     temptable.float = true
                                 end
+                                print(14)
                                 task.wait(0.5) game:GetService("Workspace").Map.Ground.HighBlock.CanCollide = true temptable.float = false api.tween(0.5, CFrame.new(73.2, 176.35, -167)) task.wait(1)
+                                print(15)
                                 for i = 0, 50 do
                                     gettoken(CFrame.new(73.2, 176.35, -167).Position)
                                 end
                                 enableall()
+                                print(16)
                                 api.tween(2, fieldpos)
                                 temptable.started.mondo = false
                             end
                         end
                         if (fieldposition - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > temptable.magnitude then
+                            print(17)
                             if puffauto == 1 then
                                 for i = 0, 10 do
                                     gettoken(api.humanoidrootpart().CFrame.Position)
                                 end
                             end
+                            print(18)
                             api.teleport(fieldpos)
                             task.wait(1)
+                            print(19)
                             if kometa.toggles.autosprinkler then makesprinklers() end
                         end
+                        print(20)
                         getprioritytokens()
+                        print(21)
                         if kometa.toggles.avoidmobs then avoidmob() end
+                        print(22)
                         if kometa.toggles.farmclosestleaf then closestleaf() end
+                        print(23)
                         if kometa.toggles.farmbubbles then getbubble() end
+                        print(24)
                         if kometa.toggles.farmclouds then getcloud() end
+                        print(25)
                         --if kometa.toggles.farmballoons then getballoons() end
                         if not kometa.toggles.donotfarmtokens and done then getlinktoken() gettoken() end
+                        print(26)
                         if not kometa.toggles.farmflower then getflower() end
+                        print(27)
                     end
                 elseif tonumber(pollenpercentage) >= tonumber(kometa.vars.convertat) then
                     print(">=")
