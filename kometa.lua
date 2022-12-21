@@ -388,7 +388,7 @@ function farmtickets(v)
                 task.wait(0.2)
                 i_tickets = i_tickets + 1
             until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 4
-            task.wait(0.1)
+            task.wait(0.35)
             temptable.collecting.tickets = false
             if temptable.float then temptable.float = false end
         end
