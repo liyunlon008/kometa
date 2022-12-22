@@ -461,7 +461,7 @@ function gettoken(v3)
     if not v3 then
         v3 = fieldposition
     end
-    if v3.x > 500 or v3.x < -500 or v3.y > 300 or v3.y < -50 or v3.z > 500 or v3.z < -500 then
+    if v3.x > 500 or v3.x < -500 or v3.y > 300 or v3.y < -30 or v3.z > 555 or v3.z < -500 then
         print("越界")
         return
     end
