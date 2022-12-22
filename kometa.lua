@@ -1468,13 +1468,8 @@ task.spawn(function() while task.wait() do
                         end
                         if (fieldposition - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > temptable.magnitude then
                             print(17)
-                            if puffauto == 1 then
-                                for i = 0, 10 do
-                                    gettoken(api.humanoidrootpart().CFrame.Position)
-                                end
-                            end
-                            print(18)
                             api.teleport(fieldpos)
+                            print(18)
                             task.wait(1)
                             print(19)
                             if kometa.toggles.autosprinkler then makesprinklers() end
