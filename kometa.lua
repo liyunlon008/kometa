@@ -461,6 +461,10 @@ function gettoken(v3)
     if not v3 then
         v3 = fieldposition
     end
+    if v3.x > 500 or v3.x < -500 or v3.y > 300 or v3.y < -50 or v3.z > 500 or v3.z < -500 then
+        print("越界")
+        return
+    end
     task.wait()
     if kometa.toggles.bloatfarm and temptable.foundpopstar then return end
     for e, r in next, game:GetService("Workspace").Collectibles:GetChildren() do
