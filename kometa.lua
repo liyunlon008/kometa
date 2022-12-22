@@ -1420,14 +1420,6 @@ task.spawn(function() while task.wait() do
                 if tonumber(pollenpercentage) < tonumber(kometa.vars.convertat) then
                     print(" < ")
                     if not temptable.tokensfarm then
-                        print(1)
-                        if puffauto == 1 then
-                            print(2)
-                            for i = 0, 10 do
-                                print(3)
-                                gettoken(api.humanoidrootpart().CFrame.Position)
-                            end
-                        end
                         print(4)
                         api.tween(1, fieldpos)
                         print(5)
@@ -1468,6 +1460,14 @@ task.spawn(function() while task.wait() do
                         end
                         if (fieldposition - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > temptable.magnitude then
                             print(17)
+                            if puffauto == 1 then
+                                print(2)
+                                for i = 0, 10 do
+                                    print(3)
+                                    gettoken(api.humanoidrootpart().CFrame.Position)
+                                end
+                            end
+                            print(28)
                             api.teleport(fieldpos)
                             print(18)
                             task.wait(1)
