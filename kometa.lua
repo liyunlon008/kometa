@@ -378,17 +378,15 @@ function farmtickets(v)
             if decal.Texture ~= "1674871631" and decal.Texture ~= "rbxassetid://1674871631" then return end
             temptable.collecting.tickets = true
             temptable.float = false
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position)
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(3, 0, 3)
             task.wait(0.1)
             local i_tickets = 0
             repeat
                 task.wait()
                 api.humanoid().WalkSpeed = 25
                 api.walkTo(v.Position)
-                task.wait(0.2)
                 i_tickets = i_tickets + 1
-            until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 4
-            task.wait(0.35)
+            until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 5
             temptable.collecting.tickets = false
             if temptable.float then temptable.float = false end
         end
