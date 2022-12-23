@@ -459,7 +459,7 @@ function gettoken(v3)
     if not v3 then
         v3 = fieldposition
     end
-    if v3.x > 500 or v3.x < -500 or v3.y > 300 or v3.y < -30 or v3.z > 555 or v3.z < -500 then
+    if v3.x > 600 or v3.x < -600 or v3.y > 300 or v3.y < -30 or v3.z > 600 or v3.z < -600 then
         print("越界")
         return
     end
@@ -1312,7 +1312,7 @@ game.Workspace.Particles.ChildAdded:Connect(function(v)
 end)
 
 task.spawn(function() while task.wait() do
-        print("zxc")
+        --print("zxc")
         if temptable.collecting.tickets then continue end
         if temptable.collecting.rares then continue end
         if kometa.toggles.autofarm then
