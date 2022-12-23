@@ -1470,7 +1470,8 @@ task.spawn(function() while task.wait() do
                                 end
                             end
                             print(28)
-                            api.teleport(fieldpos)
+                            api.tween(0.1, fieldpos)
+                            --api.teleport(fieldpos)
                             print(18)
                             task.wait(1)
                             print(19)
