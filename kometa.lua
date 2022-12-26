@@ -617,7 +617,7 @@ function killmobs()
                     task.wait(1.6)
                     timeout = timeout + 1
                     if kometa.toggles.farmpuffshrooms and game.Workspace.Happenings.Puffshrooms:FindFirstChildOfClass("Model") then timeout = 60 end
-                until v:FindFirstChild("TimerLabel", true).Visible or api.humanoid().Health == 0 or timeout > 21 or kometa.toggles.autokillmobs == false or temptable.started.windy == true
+                until v:FindFirstChild("TimerLabel", true).Visible or api.humanoid().Health == 0 or timeout > 21 or kometa.toggles.autokillmobs == false
                 for i = 1, 10 do gettoken(monsterpart.Position) end
             end
         end
@@ -1620,12 +1620,22 @@ game:GetService("Workspace").Particles.Folder2.ChildRemoved:Connect(function(chi
 end)
 
 
+
+Workspace.Particles.ChildAdded:Connect(function(instance)
+    if string.find(instance.Name, "Vicious") then
+        temptable.detected.vicious = true
+    end
+end)
 Workspace.Particles.ChildRemoved:Connect(function(instance)
     if string.find(instance.Name, "Vicious") then
         temptable.detected.vicious = false
     end
 end)
-
+game:GetService("Workspace").NPCBees.ChildAdded:Connect(function(v)
+    if v.Name == "Windy" then
+        task.wait(3) temptable.windy = v temptable.detected.windy = true
+    end
+end)
 game:GetService("Workspace").NPCBees.ChildRemoved:Connect(function(v)
     if v.Name == "Windy" then
         task.wait(3) temptable.windy = nil temptable.detected.windy = false
