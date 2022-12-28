@@ -378,7 +378,7 @@ function farmtickets(v)
             if decal.Texture ~= "1674871631" and decal.Texture ~= "rbxassetid://1674871631" then return end
             temptable.collecting.tickets = true
             temptable.float = false
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(3, 0, 3)
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(3, -2, 3)
             task.wait(0.1)
             local i_tickets = 0
             repeat
@@ -399,7 +399,7 @@ function farmrares(v)
             decal = v:FindFirstChildOfClass("Decal")
             if table.find(kometa.rares, string.split(decal.Texture, 'rbxassetid://')[2]) == nil and table.find(kometa.rares, string.split(decal.Texture, 'id=')[2]) == nil then return end
             temptable.collecting.rares = true
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position)
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(3, -2, 3)
             task.wait(0.1)
             temptable.float = false
             local i_tickets = 0
@@ -407,9 +407,7 @@ function farmrares(v)
                 task.wait()
                 api.humanoid().WalkSpeed = 25
                 api.walkTo(v.Position)
-                task.wait(0.1)
                 i_tickets = i_tickets + 1
-                print(i_tickets)
             until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 3
             temptable.collecting.rares = false
             if temptable.float then temptable.float = false end
@@ -1014,7 +1012,7 @@ links:Cheat("Button", "Token IDs", function() setclipboard("https://pastebin.com
 
 local farm = farmtab:Sector("Farming")
 farm:Cheat("Dropdown", "Field", function(Option) temptable.tokensfarm = false kometa.vars.field = Option end, { options = fieldstable })
-farm:Cheat("Slider", "Convert at:", function(Value) kometa.vars.convertat = Value end, { min = 0, max = 100, suffix = "%" })
+farm:Cheat("Slider", "Convert at:", function(Value) kometa.vars.convertat = Value end, { min = 0, max = 100, suffix = "%", default = 100 })
 farm:Cheat("Checkbox", "Autofarm", function(State) kometa.toggles.autofarm = not kometa.toggles.autofarm end)
 farm:Cheat("Checkbox", "Auto Sprinkler ⏳", function(State) kometa.toggles.autosprinkler = State end)
 farm:Cheat("Checkbox", "Autodig", function(State) kometa.toggles.autodig = State end)
@@ -1163,7 +1161,7 @@ farmsettings:Cheat("Checkbox", "Don't Walk In Field", function(State) kometa.tog
 farmsettings:Cheat("Checkbox", "Convert Hive Balloon", function(State) kometa.toggles.convertballoons = State end)
 farmsettings:Cheat("Checkbox", "Don't Farm Tokens", function(State) kometa.toggles.donotfarmtokens = State end)
 farmsettings:Cheat("Checkbox", "Enable Token Blacklisting", function(State) kometa.toggles.enabletokenblacklisting = State end)
-farmsettings:Cheat("Slider", "Walk Speed", function(Value) kometa.vars.walkspeed = Value end, { min = 0, max = 120, suffix = " studs" })
+farmsettings:Cheat("Slider", "Walk Speed", function(Value) kometa.vars.walkspeed = Value end, { min = 0, max = 120, suffix = " studs" , default = 90})
 farmsettings:Cheat("Slider", "Jump Power", function(Value) kometa.vars.jumppower = Value end, { min = 0, max = 120, suffix = " studs" })
 local raresettings = setttab:Sector("Tokens Settings")
 raresettings:Cheat("Textbox", "Asset ID", function(Value) rarename = Value end, { placeholder = 'rbxassetid' })
