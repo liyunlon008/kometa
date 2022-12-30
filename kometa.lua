@@ -378,8 +378,8 @@ function farmtickets(v)
             if decal.Texture ~= "1674871631" and decal.Texture ~= "rbxassetid://1674871631" then return end
             temptable.collecting.tickets = true
             temptable.float = false
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(3, -2, 3)
-            task.wait(0.1)
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(0, -3, 0)
+            --task.wait(0.1)
             local i_tickets = 0
             repeat
                 task.wait()
@@ -399,8 +399,8 @@ function farmrares(v)
             decal = v:FindFirstChildOfClass("Decal")
             if table.find(kometa.rares, string.split(decal.Texture, 'rbxassetid://')[2]) == nil and table.find(kometa.rares, string.split(decal.Texture, 'id=')[2]) == nil then return end
             temptable.collecting.rares = true
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(3, -2, 3)
-            task.wait(0.1)
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(0, -3, 0)
+            --task.wait(0.1)
             temptable.float = false
             local i_tickets = 0
             repeat
