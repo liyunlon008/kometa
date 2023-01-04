@@ -595,7 +595,7 @@ function killmobs()
     local timeout = 0
     for i, v in pairs(game:GetService("Workspace").MonsterSpawners:GetChildren()) do
         if v:FindFirstChild("Territory") then
-            if v.Name ~= "Commando Chick" and v.Name ~= "CoconutCrab" and v.Name ~= "StumpSnail" and v.Name ~= "TunnelBear" and v.Name ~= "King Beetle Cave" and not v.Name:match("CaveMonster") and not v:FindFirstChild("TimerLabel", true).Visible then
+            if v.Name ~= "ForestMantis2" and v.Name ~= "Commando Chick" and v.Name ~= "CoconutCrab" and v.Name ~= "StumpSnail" and v.Name ~= "TunnelBear" and v.Name ~= "King Beetle Cave" and not v.Name:match("CaveMonster") and not v:FindFirstChild("TimerLabel", true).Visible then
                 if v.Name:match("Werewolf") then
                     monsterpart = game:GetService("Workspace").Territories.WerewolfPlateau.w
                 elseif v.Name:match("Mushroom") then
@@ -614,6 +614,7 @@ function killmobs()
                     avoidmob()
                     task.wait(1.6)
                     timeout = timeout + 1
+                    gettoken(monsterpart.Position)
                     if kometa.toggles.farmpuffshrooms and game.Workspace.Happenings.Puffshrooms:FindFirstChildOfClass("Model") then timeout = 60 end
                 until v:FindFirstChild("TimerLabel", true).Visible or api.humanoid().Health == 0 or timeout > 21 or kometa.toggles.autokillmobs == false
                 for i = 1, 10 do gettoken(monsterpart.Position) end
