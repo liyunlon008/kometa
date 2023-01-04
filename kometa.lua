@@ -934,11 +934,8 @@ function getcrosshairs(v)
     if v.BrickColor ~= BrickColor.new("Lime green") and v.BrickColor ~= BrickColor.new("Flint") then
         if temptable.crosshair then repeat task.wait() until not temptable.crosshair end
         temptable.crosshair = true
-        -- api.walkTo(v.Position)
-            repeat
-            task.wait()
-            api.walkTo(v.Position)
-        until not v.Parent or v.BrickColor == BrickColor.new("Forest green") or v.BrickColor == BrickColor.new("Royal purple")
+        api.walkTo(v.Position)
+        repeat task.wait() api.walkTo(v.Position) until not v.Parent or v.BrickColor == BrickColor.new("Forest green")
         task.wait(0.1)
         temptable.crosshair = false
         table.remove(temptable.crosshairs, table.find(temptable.crosshairs, v))
@@ -946,6 +943,7 @@ function getcrosshairs(v)
         table.remove(temptable.crosshairs, table.find(temptable.crosshairs, v))
     end
 end
+
 
 function makequests()
     pcall(function()
@@ -1161,7 +1159,7 @@ farmsettings:Cheat("Checkbox", "Don't Walk In Field", function(State) kometa.tog
 farmsettings:Cheat("Checkbox", "Convert Hive Balloon", function(State) kometa.toggles.convertballoons = State end)
 farmsettings:Cheat("Checkbox", "Don't Farm Tokens", function(State) kometa.toggles.donotfarmtokens = State end)
 farmsettings:Cheat("Checkbox", "Enable Token Blacklisting", function(State) kometa.toggles.enabletokenblacklisting = State end)
-farmsettings:Cheat("Slider", "Walk Speed", function(Value) kometa.vars.walkspeed = Value end, { min = 0, max = 120, suffix = " studs" , default = 90})
+farmsettings:Cheat("Slider", "Walk Speed", function(Value) kometa.vars.walkspeed = Value end, { min = 0, max = 120, suffix = " studs", default = 90 })
 farmsettings:Cheat("Slider", "Jump Power", function(Value) kometa.vars.jumppower = Value end, { min = 0, max = 120, suffix = " studs" })
 local raresettings = setttab:Sector("Tokens Settings")
 raresettings:Cheat("Textbox", "Asset ID", function(Value) rarename = Value end, { placeholder = 'rbxassetid' })
