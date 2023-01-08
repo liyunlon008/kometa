@@ -1461,8 +1461,7 @@ task.spawn(function() while task.wait() do
                             print(17)
                             if puffauto == 1 then
                                 print(2)
-                                for i = 0, 10 do
-                                    print(3)
+                                for i = 0, 30 do
                                     gettoken(api.humanoidrootpart().CFrame.Position)
                                 end
                             end
