@@ -379,14 +379,14 @@ function farmtickets(v)
             temptable.collecting.tickets = true
             temptable.float = false
             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(0, -3, 0)
-            --task.wait(0.1)
-            local i_tickets = 0
-            repeat
-                task.wait()
-                api.humanoid().WalkSpeed = 25
-                api.walkTo(v.Position)
-                i_tickets = i_tickets + 1
-            until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 5
+            task.wait(0.1)
+            --local i_tickets = 0
+            --repeat
+            --task.wait()
+            --api.humanoid().WalkSpeed = 25
+            --api.walkTo(v.Position)
+            --i_tickets = i_tickets + 1
+            --until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 5
             temptable.collecting.tickets = false
             if temptable.float then temptable.float = false end
         end
@@ -400,15 +400,15 @@ function farmrares(v)
             if table.find(kometa.rares, string.split(decal.Texture, 'rbxassetid://')[2]) == nil and table.find(kometa.rares, string.split(decal.Texture, 'id=')[2]) == nil then return end
             temptable.collecting.rares = true
             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(0, -3, 0)
-            --task.wait(0.1)
+            task.wait(0.1)
             temptable.float = false
-            local i_tickets = 0
-            repeat
-                task.wait()
-                api.humanoid().WalkSpeed = 25
-                api.walkTo(v.Position)
-                i_tickets = i_tickets + 1
-            until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 3
+            --local i_tickets = 0
+            --repeat
+            --task.wait()
+            --api.humanoid().WalkSpeed = 25
+            --api.walkTo(v.Position)
+            --i_tickets = i_tickets + 1
+            --until not v.Parent or v.CFrame.YVector.Y ~= 1 or i_tickets > 3
             temptable.collecting.rares = false
             if temptable.float then temptable.float = false end
         end
@@ -1461,7 +1461,8 @@ task.spawn(function() while task.wait() do
                             print(17)
                             if puffauto == 1 then
                                 print(2)
-                                for i = 0, 30 do
+                                for i = 0, 10 do
+                                    print(3)
                                     gettoken(api.humanoidrootpart().CFrame.Position)
                                 end
                             end
