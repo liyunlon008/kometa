@@ -972,7 +972,8 @@ function getcrosshairstwo(v)
         temptable.crosshair = true
         repeat
             task.wait()
-            api.walkTo(v.Position)
+            api.humanoid():MoveTo(v.Position)
+            --api.walkTo(v.Position)
         until not v.Parent or v.BrickColor == BrickColor.new("Forest green") or v.BrickColor == BrickColor.new("Royal purple")
         task.wait(0.1)
         temptable.crosshair = false
