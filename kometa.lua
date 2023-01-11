@@ -295,6 +295,7 @@ local kometa = {
         faceflames = false,
         visualnight = false,
         convertminutestoggle = false,
+        farmglitchedtokens = false
     },
     vars = {
         field = "Ant Field",
@@ -399,9 +400,9 @@ function farmrares(v)
             decal = v:FindFirstChildOfClass("Decal")
             if table.find(kometa.rares, string.split(decal.Texture, 'rbxassetid://')[2]) == nil and table.find(kometa.rares, string.split(decal.Texture, 'id=')[2]) == nil then return end
             temptable.collecting.rares = true
+            temptable.float = false
             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position) * CFrame.new(0, -3, 0)
             task.wait(0.1)
-            temptable.float = false
             --local i_tickets = 0
             --repeat
             --task.wait()
@@ -921,6 +922,25 @@ function getflame()
     end
 end
 
+
+
+function getglitchtoken()
+    for i, v in pairs(game:GetService("Workspace").Camera.DupedTokens:GetChildren()) do
+        if tonumber((v.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude / 1.4 and string.split(v:FindFirstChild("FrontDecal").Texture, 'id=')[2] == "5877939956" then
+            if kometa.toggles.faceballoons and findballoon() then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findballoon().BalloonRoot.Position.X, api.humanoidrootpart().Position.Y, findballoon().BalloonRoot.Position.Z)) end
+            if kometa.toggles.faceflames and findclosestflame() then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findclosestflame().Position.X, api.humanoidrootpart().Position.Y, findclosestflame().Position.Z)) end
+            repeat
+                api.humanoid().AutoRotate = false
+                api.humanoid():MoveTo(v.Position)
+                task.wait()
+            until not v or not v.Parent
+            api.humanoid().AutoRotate = true
+            break
+        end
+    end
+end
+
+
 function avoidmob()
     for i, v in next, game:GetService("Workspace").Monsters:GetChildren() do
         if v:FindFirstChild("Head") then
@@ -1022,6 +1042,7 @@ farm:Cheat("Checkbox", "Farm Flames", function(State) kometa.toggles.farmflame =
 farm:Cheat("Checkbox", "Farm Coconuts & Shower", function(State) kometa.toggles.farmcoco = State end)
 farm:Cheat("Checkbox", "Farm Precise Crosshairs", function(State) kometa.toggles.collectcrosshairs = State end)
 farm:Cheat("Checkbox", "Farm Fuzzy Bombs", function(State) kometa.toggles.farmfuzzy = State end)
+farm:Cheat("Checkbox", "Farm Glitched Tokens", function(State) kometa.toggles.farmglitchedtokens = State end)
 farm:Cheat("Checkbox", "Farm Under Balloons", function(State) kometa.toggles.farmballoons = State end)
 farm:Cheat("Checkbox", "Farm Under Clouds", function(State) kometa.toggles.farmclouds = State end)
 local farmsecond = farmtab:Sector("Farming")
@@ -1276,6 +1297,7 @@ task.spawn(function() while task.wait() do
             --if kometa.toggles.farmcoco then getcoco() end
             --if kometa.toggles.collectcrosshairs then getcrosshairs() end
             if kometa.toggles.farmflame then getflame() end
+            if kometa.toggles.farmglitchedtokens then getglitchtoken() end
             -- if kometa.toggles.farmfuzzy then getfuzzy() end
         end
     end end)
@@ -1309,7 +1331,6 @@ game.Workspace.Particles.ChildAdded:Connect(function(v)
 end)
 
 task.spawn(function() while task.wait() do
-        --print("zxc")
         if temptable.collecting.tickets then continue end
         if temptable.collecting.rares then continue end
         if kometa.toggles.autofarm then
@@ -1417,82 +1438,53 @@ task.spawn(function() while task.wait() do
                     end
                 end
                 if tonumber(pollenpercentage) < tonumber(kometa.vars.convertat) then
-                    print(" < ")
                     if not temptable.tokensfarm then
-                        print(4)
                         api.tween(1, fieldpos)
-                        print(5)
                         task.wait(1)
-                        print(6)
                         temptable.tokensfarm = true
-                        print(7)
                         if kometa.toggles.autosprinkler then makesprinklers() end
-                        print(8)
                     else
-                        print(9)
                         if kometa.toggles.killmondo then
-                            print(10)
                             while kometa.toggles.killmondo and game.Workspace.Monsters:FindFirstChild("Mondo Chick (Lvl 8)") and not temptable.started.vicious and not temptable.started.monsters do
-                                print(11)
                                 temptable.started.mondo = true
                                 while game.Workspace.Monsters:FindFirstChild("Mondo Chick (Lvl 8)") do
-                                    print(12)
                                     disableall()
                                     game:GetService("Workspace").Map.Ground.HighBlock.CanCollide = false
                                     mondopition = game.Workspace.Monsters["Mondo Chick (Lvl 8)"].Head.Position
-                                    print(13)
                                     api.tween(1, CFrame.new(mondopition.x, mondopition.y - 60, mondopition.z))
-                                    task.wait(1)
                                     temptable.float = true
                                 end
-                                print(14)
                                 task.wait(0.5) game:GetService("Workspace").Map.Ground.HighBlock.CanCollide = true temptable.float = false api.tween(0.5, CFrame.new(73.2, 176.35, -167)) task.wait(1)
-                                print(15)
                                 for i = 0, 50 do
                                     gettoken(CFrame.new(73.2, 176.35, -167).Position)
                                 end
                                 enableall()
-                                print(16)
                                 api.tween(2, fieldpos)
                                 temptable.started.mondo = false
                             end
                         end
                         if (fieldposition - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude > temptable.magnitude then
-                            print(17)
                             if puffauto == 1 then
-                                print(2)
                                 for i = 0, 10 do
-                                    print(3)
                                     gettoken(api.humanoidrootpart().CFrame.Position)
                                 end
                             end
-                            print(28)
                             api.tween(0.1, fieldpos)
                             --api.teleport(fieldpos)
-                            print(18)
                             task.wait(1)
-                            print(19)
                             if kometa.toggles.autosprinkler then makesprinklers() end
                         end
-                        print(20)
                         getprioritytokens()
-                        print(21)
                         if kometa.toggles.avoidmobs then avoidmob() end
-                        print(22)
                         if kometa.toggles.farmclosestleaf then closestleaf() end
-                        print(23)
                         if kometa.toggles.farmbubbles then getbubble() end
-                        print(24)
                         if kometa.toggles.farmclouds then getcloud() end
-                        print(25)
                         --if kometa.toggles.farmballoons then getballoons() end
                         if not kometa.toggles.donotfarmtokens and done then getlinktoken() gettoken() end
-                        print(26)
                         if not kometa.toggles.farmflower then getflower() end
-                        print(27)
                     end
                 elseif tonumber(pollenpercentage) >= tonumber(kometa.vars.convertat) then
-                    print(">=")
+
                     temptable.tokensfarm = false
                     api.tween(1, game:GetService("Players").LocalPlayer.SpawnPos.Value * CFrame.fromEulerAnglesXYZ(0, 110, 0) + Vector3.new(0, 0, 9))
                     temptable.converting = true
