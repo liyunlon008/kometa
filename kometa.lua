@@ -295,7 +295,7 @@ local kometa = {
         faceflames = false,
         visualnight = false,
         convertminutestoggle = false,
-        farmglitchedtokens = false
+        farmglitchedtokens = false,
     },
     vars = {
         field = "Ant Field",
@@ -1452,6 +1452,7 @@ task.spawn(function() while task.wait() do
                                     game:GetService("Workspace").Map.Ground.HighBlock.CanCollide = false
                                     mondopition = game.Workspace.Monsters["Mondo Chick (Lvl 8)"].Head.Position
                                     api.tween(1, CFrame.new(mondopition.x, mondopition.y - 60, mondopition.z))
+                                    task.wait(1)
                                     temptable.float = true
                                 end
                                 task.wait(0.5) game:GetService("Workspace").Map.Ground.HighBlock.CanCollide = true temptable.float = false api.tween(0.5, CFrame.new(73.2, 176.35, -167)) task.wait(1)
