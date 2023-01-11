@@ -1,6 +1,6 @@
-local api = loadstring(game:HttpGet("https://raw.githubusercontent.com/liyunlon008/kometa/main/api/api.lua"))()
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liyunlon008/kometa/main/ui/finity.lua"))()
-local bssapi = loadstring(game:HttpGet("https://raw.githubusercontent.com/liyunlon008/kometa/main/api/bssapi.lua"))()
+local api = loadstring(game:HttpGet("https://cdn.jsdelivr.net/gh/liyunlon008/kometa@main/api/api.lua"))()
+local library = loadstring(game:HttpGet("https://cdn.jsdelivr.net/gh/liyunlon008/kometa@main/ui/finity.lua"))()
+local bssapi = loadstring(game:HttpGet("https://cdn.jsdelivr.net/gh/liyunlon008/kometa@main/api/bssapi.lua"))()
 
 if not isfolder("kometa") then makefolder("kometa") end
 if isfile('kometa.txt') == false then (syn and syn.request or http_request)({ Url = "http://127.0.0.1:6463/rpc?v=1", Method = "POST", Headers = {["Content-Type"] = "application/json", ["Origin"] = "https://discord.com" }, Body = game:GetService("HttpService"):JSONEncode({ cmd = "INVITE_BROWSER", args = { code = "2a5gVpcpzv" }, nonce = game:GetService("HttpService"):GenerateGUID(false) }), writefile('kometa.txt', "discord") }) end
@@ -271,7 +271,7 @@ local kometa = {
         farmsnowflakes = false,
         collectgingerbreads = false,
         collectcrosshairs = false,
-        collectcrosshairs2 = false,
+        collectcrosshairstwo = false,
         farmpuffshrooms = false,
         tptonpc = false,
         donotfarmtokens = false,
@@ -966,7 +966,7 @@ function getcrosshairs(v)
     end
 end
 
-function getcrosshairs2(v)
+function getcrosshairstwo(v)
     if v.BrickColor ~= BrickColor.new("Lime green") and v.BrickColor ~= BrickColor.new("Flint") then
         if temptable.crosshair then repeat task.wait() until not temptable.crosshair end
         temptable.crosshair = true
@@ -1057,7 +1057,7 @@ farm:Cheat("Checkbox", "Bubble Bloat Helper", function(State) kometa.toggles.blo
 farm:Cheat("Checkbox", "Farm Flames", function(State) kometa.toggles.farmflame = State end)
 farm:Cheat("Checkbox", "Farm Coconuts & Shower", function(State) kometa.toggles.farmcoco = State end)
 farm:Cheat("Checkbox", "Farm Precise Crosshairs", function(State) kometa.toggles.collectcrosshairs = State end)
-farm:Cheat("Checkbox", "Crosshairs Mode 2", function(State) kometa.toggles.collectcrosshairs2 = State end)
+farm:Cheat("Checkbox", "Crosshairs Mode 2", function(State) kometa.toggles.collectcrosshairstwo = State end)
 farm:Cheat("Checkbox", "Farm Fuzzy Bombs", function(State) kometa.toggles.farmfuzzy = State end)
 farm:Cheat("Checkbox", "Farm Glitched Tokens", function(State) kometa.toggles.farmglitchedtokens = State end)
 farm:Cheat("Checkbox", "Farm Under Balloons", function(State) kometa.toggles.farmballoons = State end)
@@ -1172,9 +1172,9 @@ extras:Cheat("Button", "Invisibility", function(State) api.teleport(CFrame.new(0
 extras:Cheat("Checkbox", "Float", function(State) temptable.float = State end)
 
 local optimize = extrtab:Sector("Optimization")
-optimize:Cheat("Button", "Hide nickname", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/liyunlon008/kometa/main/other/nickspoof.lua"))() end, { text = '' })
-optimize:Cheat("Button", "Boost FPS", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/liyunlon008/kometa/main/other/fpsboost.lua"))() end, { text = '' })
-optimize:Cheat("Button", "Destroy Decals", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/liyunlon008/kometa/main/other/destroydecals.lua"))() end, { text = '' })
+optimize:Cheat("Button", "Hide nickname", function() loadstring(game:HttpGet("https://cdn.jsdelivr.net/gh/liyunlon008/kometa@main/other/nickspoof.lua"))() end, { text = '' })
+optimize:Cheat("Button", "Boost FPS", function() loadstring(game:HttpGet("https://cdn.jsdelivr.net/gh/liyunlon008/kometa@main/other/fpsboost.lua"))() end, { text = '' })
+optimize:Cheat("Button", "Destroy Decals", function() loadstring(game:HttpGet("https://cdn.jsdelivr.net/gh/liyunlon008/kometa@main/other/destroydecals.lua"))() end, { text = '' })
 optimize:Cheat("Checkbox", "Disable 3D Render On Unfocus", function(State) kometa.toggles.disablerender = State end)
 optimize:Cheat("Checkbox", "Disable 3D Render", function(State) game:GetService("RunService"):Set3dRenderingEnabled(not State) end)
 
@@ -1330,8 +1330,8 @@ game.Workspace.Particles.ChildAdded:Connect(function(v)
             if v ~= nil and v.BrickColor ~= BrickColor.new("Forest green") and not temptable.started.ant and v.BrickColor ~= BrickColor.new("Flint") and (v.Position - api.humanoidrootpart().Position).magnitude < temptable.magnitude and kometa.toggles.autofarm and kometa.toggles.collectcrosshairs and not temptable.converting then
                 if #temptable.crosshairs <= 3 then
                     table.insert(temptable.crosshairs, v)
-                    if kometa.toggles.collectcrosshairs2 then
-                        getcrosshairs2(v)
+                    if kometa.toggles.collectcrosshairstwo then
+                        getcrosshairstwo(v)
                     else
                         getcrosshairs(v)
                     end
