@@ -16,6 +16,7 @@ function maskequip(mask) local ohString1 = "Equip" local ohTable2 = {["Mute"] = 
 local lasttouched = nil
 local done = true
 local hi = false
+local BIU = false
 
 -- Script tables
 
@@ -680,7 +681,7 @@ function getplanters()
     table.clear(planterst.planterid)
     for i, v in pairs(debug.getupvalues(require(game:GetService("ReplicatedStorage").LocalPlanters).LoadPlanter)[4]) do
         if v.GrowthPercent == 1 and v.IsMine then
-            table.insert(planterst.plantername, v.Type.." Planter")
+            table.insert(planterst.plantername, v.Type .. " Planter")
             table.insert(planterst.planterid, v.ActorID)
         end
     end
@@ -940,11 +941,13 @@ function getglitchtoken()
             if kometa.toggles.faceballoons and findballoon() then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findballoon().BalloonRoot.Position.X, api.humanoidrootpart().Position.Y, findballoon().BalloonRoot.Position.Z)) end
             if kometa.toggles.faceflames and findclosestflame() then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findclosestflame().Position.X, api.humanoidrootpart().Position.Y, findclosestflame().Position.Z)) end
             repeat
+                BIU = true
                 api.humanoid().AutoRotate = false
                 api.humanoid():MoveTo(v.Position)
                 task.wait()
             until not v or not v.Parent
             api.humanoid().AutoRotate = true
+            BIU = false
             break
         end
     end
@@ -1338,7 +1341,7 @@ game.Workspace.Particles.ChildAdded:Connect(function(v)
         elseif v.Name == "Crosshair" then
             task.wait(0.2)
             if v ~= nil and v.BrickColor ~= BrickColor.new("Forest green") and not temptable.started.ant and v.BrickColor ~= BrickColor.new("Flint") and (v.Position - api.humanoidrootpart().Position).magnitude < temptable.magnitude and kometa.toggles.autofarm and kometa.toggles.collectcrosshairs and not temptable.converting then
-                if #temptable.crosshairs <= 3 and temptable.sprouts.detected == false then
+                if #temptable.crosshairs <= 3 and temptable.sprouts.detected == false and BIU == false then
                     table.insert(temptable.crosshairs, v)
                     if kometa.toggles.collectcrosshairstwo then
                         getcrosshairstwo(v)
