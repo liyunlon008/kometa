@@ -770,6 +770,7 @@ function farmant()
 end
 
 function collectplanters()
+    print("Planter")
     getplanters()
     for i, v in pairs(planterst.plantername) do
         if api.partwithnamepart(v, game:GetService("Workspace").Planters) and api.partwithnamepart(v, game:GetService("Workspace").Planters):FindFirstChild("Soil") then
@@ -927,7 +928,8 @@ end
 
 function getglitchtoken()
     for i, v in pairs(game:GetService("Workspace").Camera.DupedTokens:GetChildren()) do
-        if tonumber((v.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude / 1.4 and string.split(v:FindFirstChild("FrontDecal").Texture, 'id=')[2] == "5877939956" then
+        e = v:FindFirstChild("FrontDecal")
+        if tonumber((e.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude / 1.4 and string.split(v:FindFirstChild("FrontDecal").Texture, 'id=')[2] == "5877939956" then
             if kometa.toggles.faceballoons and findballoon() then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findballoon().BalloonRoot.Position.X, api.humanoidrootpart().Position.Y, findballoon().BalloonRoot.Position.Z)) end
             if kometa.toggles.faceflames and findclosestflame() then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findclosestflame().Position.X, api.humanoidrootpart().Position.Y, findclosestflame().Position.Z)) end
             repeat
@@ -1315,7 +1317,7 @@ task.spawn(function() while task.wait() do
             --if kometa.toggles.farmcoco then getcoco() end
             --if kometa.toggles.collectcrosshairs then getcrosshairs() end
             if kometa.toggles.farmflame then getflame() end
-            if kometa.toggles.farmglitchedtokens then getglitchtoken() end
+            --if kometa.toggles.farmglitchedtokens then getglitchtoken() end
             -- if kometa.toggles.farmfuzzy then getfuzzy() end
         end
     end end)
@@ -1498,6 +1500,7 @@ task.spawn(function() while task.wait() do
                             if kometa.toggles.autosprinkler then makesprinklers() end
                         end
                         getprioritytokens()
+                        if kometa.toggles.farmglitchedtokens then getglitchtoken() end
                         if kometa.toggles.avoidmobs then avoidmob() end
                         if kometa.toggles.farmclosestleaf then closestleaf() end
                         if kometa.toggles.farmbubbles then getbubble() end
@@ -1507,7 +1510,6 @@ task.spawn(function() while task.wait() do
                         if not kometa.toggles.farmflower then getflower() end
                     end
                 elseif tonumber(pollenpercentage) >= tonumber(kometa.vars.convertat) then
-
                     temptable.tokensfarm = false
                     api.tween(1, game:GetService("Players").LocalPlayer.SpawnPos.Value * CFrame.fromEulerAnglesXYZ(0, 110, 0) + Vector3.new(0, 0, 9))
                     temptable.converting = true
@@ -1894,5 +1896,3 @@ for _, part in next, workspace:FindFirstChild("FieldDecos"):GetDescendants() do 
 for _, part in next, workspace:FindFirstChild("Decorations"):GetDescendants() do if part:IsA("BasePart") and (part.Parent.Name == "Bush" or part.Parent.Name == "Blue Flower") then part.CanCollide = false part.Transparency = part.Transparency < 0.5 and 0.5 or part.Transparency task.wait() end end
 for i, v in next, workspace.Decorations.Misc:GetDescendants() do if v.Parent.Name == "Mushroom" then v.CanCollide = false v.Transparency = 0.5 end end
 game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.BeePopUp.MutationFrame.MutationLabel.Text = ""
-
-
