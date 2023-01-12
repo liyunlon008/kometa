@@ -1317,7 +1317,7 @@ task.spawn(function() while task.wait() do
             --if kometa.toggles.farmcoco then getcoco() end
             --if kometa.toggles.collectcrosshairs then getcrosshairs() end
             if kometa.toggles.farmflame then getflame() end
-            --if kometa.toggles.farmglitchedtokens then getglitchtoken() end
+            if kometa.toggles.farmglitchedtokens then getglitchtoken() end
             -- if kometa.toggles.farmfuzzy then getfuzzy() end
         end
     end end)
@@ -1500,7 +1500,6 @@ task.spawn(function() while task.wait() do
                             if kometa.toggles.autosprinkler then makesprinklers() end
                         end
                         getprioritytokens()
-                        if kometa.toggles.farmglitchedtokens then getglitchtoken() end
                         if kometa.toggles.avoidmobs then avoidmob() end
                         if kometa.toggles.farmclosestleaf then closestleaf() end
                         if kometa.toggles.farmbubbles then getbubble() end
