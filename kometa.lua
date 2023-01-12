@@ -928,8 +928,7 @@ end
 
 function getglitchtoken()
     for i, v in pairs(game:GetService("Workspace").Camera.DupedTokens:GetChildren()) do
-        e = v:FindFirstChild("FrontDecal")
-        if tonumber((e.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude / 1.4 and string.split(v:FindFirstChild("FrontDecal").Texture, 'id=')[2] == "5877939956" then
+        if tonumber((v.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude / 1.4 and string.split(v:FindFirstChild("FrontDecal").Texture, 'id=')[2] == "5877939956" then
             if kometa.toggles.faceballoons and findballoon() then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findballoon().BalloonRoot.Position.X, api.humanoidrootpart().Position.Y, findballoon().BalloonRoot.Position.Z)) end
             if kometa.toggles.faceflames and findclosestflame() then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findclosestflame().Position.X, api.humanoidrootpart().Position.Y, findclosestflame().Position.Z)) end
             repeat
