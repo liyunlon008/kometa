@@ -1316,7 +1316,7 @@ task.spawn(function() while task.wait() do
             --if kometa.toggles.farmcoco then getcoco() end
             --if kometa.toggles.collectcrosshairs then getcrosshairs() end
             if kometa.toggles.farmflame then getflame() end
-            if kometa.toggles.farmglitchedtokens then getglitchtoken() end
+            if kometa.toggles.farmglitchedtokens and temptable.sprouts.detected == false then getglitchtoken() end
             -- if kometa.toggles.farmfuzzy then getfuzzy() end
         end
     end end)
@@ -1330,7 +1330,7 @@ game.Workspace.Particles.ChildAdded:Connect(function(v)
         elseif v.Name == "Crosshair" then
             task.wait(0.2)
             if v ~= nil and v.BrickColor ~= BrickColor.new("Forest green") and not temptable.started.ant and v.BrickColor ~= BrickColor.new("Flint") and (v.Position - api.humanoidrootpart().Position).magnitude < temptable.magnitude and kometa.toggles.autofarm and kometa.toggles.collectcrosshairs and not temptable.converting then
-                if #temptable.crosshairs <= 3 then
+                if #temptable.crosshairs <= 3 and temptable.sprouts.detected == false then
                     table.insert(temptable.crosshairs, v)
                     if kometa.toggles.collectcrosshairstwo then
                         getcrosshairstwo(v)
