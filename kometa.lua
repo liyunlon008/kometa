@@ -680,7 +680,7 @@ function getplanters()
     table.clear(planterst.planterid)
     for i, v in pairs(debug.getupvalues(require(game:GetService("ReplicatedStorage").LocalPlanters).LoadPlanter)[4]) do
         if v.GrowthPercent == 1 and v.IsMine then
-            table.insert(planterst.plantername, v.Type)
+            table.insert(planterst.plantername, v.Type.." Planter")
             table.insert(planterst.planterid, v.ActorID)
         end
     end
@@ -769,16 +769,24 @@ function farmant()
     temptable.stats.farmedants = temptable.stats.farmedants + 1
 end
 
+function Plantermatch(name, path)
+    for i, v in next, path:GetChildren() do
+        if v.Name == name then
+            return v
+        end
+    end
+end
+
 function collectplanters()
     print("Planter")
     getplanters()
     for i, v in pairs(planterst.plantername) do
-        if api.partwithnamepart(v, game:GetService("Workspace").Planters) and api.partwithnamepart(v, game:GetService("Workspace").Planters):FindFirstChild("Soil") then
-            soil = api.partwithnamepart(v, game:GetService("Workspace").Planters).Soil
+        if Plantermatch(v, game:GetService("Workspace").Planters) and Plantermatch(v, game:GetService("Workspace").Planters):FindFirstChild("Soil") then
+            soil = Plantermatch(v, game:GetService("Workspace").Planters).Soil
             api.humanoidrootpart().CFrame = soil.CFrame
             game:GetService("ReplicatedStorage").Events.PlanterModelCollect:FireServer(planterst.planterid[i])
             task.wait(0.5)
-            game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer({["Name"] = v .. " Planter" })
+            game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer({["Name"] = v })
             for i = 1, 5 do gettoken(soil.Position) end
             task.wait(2)
         end
