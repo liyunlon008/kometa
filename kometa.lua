@@ -17,11 +17,12 @@ local lasttouched = nil
 local done = true
 local hi = false
 local BIU = false
+local Alder = false
 
 -- Script tables
 
 local temptable = {
-    version = "1.2.1",
+    version = "1.2.2",
     blackfield = "Ant Field",
     redfields = {},
     bluefields = {},
@@ -933,11 +934,9 @@ function getflame()
     end
 end
 
-
-
 function getglitchtoken()
     for i, v in pairs(game:GetService("Workspace").Camera.DupedTokens:GetChildren()) do
-        if tonumber((v.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude / 1.4 and string.split(v:FindFirstChild("FrontDecal").Texture, 'id=')[2] == "5877939956" then
+        if tonumber((v.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude) < temptable.magnitude / 1.4 and string.split(v:FindFirstChild("FrontDecal").Texture, 'id=')[2] == "5877939956" and temptable.converting == false and kometa.toggles.autofarm then
             if kometa.toggles.faceballoons and findballoon() then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findballoon().BalloonRoot.Position.X, api.humanoidrootpart().Position.Y, findballoon().BalloonRoot.Position.Z)) end
             if kometa.toggles.faceflames and findclosestflame() then api.humanoidrootpart().CFrame = CFrame.lookAt(api.humanoidrootpart().Position, Vector3.new(findclosestflame().Position.X, api.humanoidrootpart().Position.Y, findclosestflame().Position.Z)) end
             repeat
@@ -945,7 +944,7 @@ function getglitchtoken()
                 api.humanoid().AutoRotate = false
                 api.humanoid():MoveTo(v.Position)
                 task.wait()
-            until not v or not v.Parent
+            until not v or not v.Parent or temptable.converting
             api.humanoid().AutoRotate = true
             BIU = false
             break
@@ -982,20 +981,28 @@ function getcrosshairstwo(v)
     if v.BrickColor ~= BrickColor.new("Lime green") and v.BrickColor ~= BrickColor.new("Flint") then
         if temptable.crosshair then repeat task.wait() until not temptable.crosshair end
         temptable.crosshair = true
-        if v.BrickColor == BrickColor.new("Alder") then
-            repeat task.wait() api.walkTo(v.Position) until not v.Parent or v.BrickColor == BrickColor.new("Forest green") or v.BrickColor ~= BrickColor.new("Alder")
-        else
-            repeat
-                task.wait()
-                api.humanoid():MoveTo(v.Position)
-            until not v.Parent or v.BrickColor == BrickColor.new("Forest green") or v.BrickColor == BrickColor.new("Royal purple")
-        end
+        repeat
+            task.wait()
+            api.walkTo(v.Position)
+        until not v.Parent or v.BrickColor == BrickColor.new("Forest green") or v.BrickColor == BrickColor.new("Royal purple") or Alder == true
         task.wait(0.1)
         temptable.crosshair = false
         table.remove(temptable.crosshairs, table.find(temptable.crosshairs, v))
     else
         table.remove(temptable.crosshairs, table.find(temptable.crosshairs, v))
     end
+end
+
+function getcrosshairsAlder(v)
+    if v.BrickColor == BrickColor.new("Alder") then
+        temptable.crosshair = true
+        api.walkTo(v.Position)
+        repeat task.wait() api.walkTo(v.Position) until not v.Parent
+        task.wait(0.1)
+        Alder = false
+        temptable.crosshair = false
+    end
+
 end
 
 function makequests()
@@ -1344,7 +1351,11 @@ game.Workspace.Particles.ChildAdded:Connect(function(v)
         elseif v.Name == "Crosshair" then
             task.wait(0.2)
             if v ~= nil and v.BrickColor ~= BrickColor.new("Forest green") and not temptable.started.ant and v.BrickColor ~= BrickColor.new("Flint") and (v.Position - api.humanoidrootpart().Position).magnitude < temptable.magnitude and kometa.toggles.autofarm and kometa.toggles.collectcrosshairs and not temptable.converting then
-                if #temptable.crosshairs <= 3 and temptable.sprouts.detected == false and BIU == false then
+                if v.BrickColor == BrickColor.new("Alder") and kometa.toggles.collectcrosshairstwo and temptable.sprouts.detected == false and BIU == false then
+                    Alder = true
+                    getcrosshairsAlder(v)
+                end
+                if #temptable.crosshairs <= 3 and temptable.sprouts.detected == false and BIU == false and Alder == false then
                     table.insert(temptable.crosshairs, v)
                     if kometa.toggles.collectcrosshairstwo then
                         getcrosshairstwo(v)
