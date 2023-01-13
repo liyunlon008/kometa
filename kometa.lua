@@ -982,11 +982,14 @@ function getcrosshairstwo(v)
     if v.BrickColor ~= BrickColor.new("Lime green") and v.BrickColor ~= BrickColor.new("Flint") then
         if temptable.crosshair then repeat task.wait() until not temptable.crosshair end
         temptable.crosshair = true
-        repeat
-            task.wait()
-            api.humanoid():MoveTo(v.Position)
-            --api.walkTo(v.Position)
-        until not v.Parent or v.BrickColor == BrickColor.new("Forest green") or v.BrickColor == BrickColor.new("Royal purple")
+        if v.BrickColor == BrickColor.new("Alder") then
+            repeat task.wait() api.walkTo(v.Position) until not v.Parent or v.BrickColor == BrickColor.new("Forest green") or v.BrickColor ~= BrickColor.new("Alder")
+        else
+            repeat
+                task.wait()
+                api.humanoid():MoveTo(v.Position)
+            until not v.Parent or v.BrickColor == BrickColor.new("Forest green") or v.BrickColor == BrickColor.new("Royal purple")
+        end
         task.wait(0.1)
         temptable.crosshair = false
         table.remove(temptable.crosshairs, table.find(temptable.crosshairs, v))
