@@ -978,13 +978,16 @@ function getcrosshairs(v)
 end
 
 function getcrosshairstwo(v)
+    local tc
     if v.BrickColor ~= BrickColor.new("Lime green") and v.BrickColor ~= BrickColor.new("Flint") then
         if temptable.crosshair then repeat task.wait() until not temptable.crosshair end
         temptable.crosshair = true
         repeat
             task.wait()
             api.walkTo(v.Position)
-        until not v.Parent or v.BrickColor == BrickColor.new("Forest green") or v.BrickColor == BrickColor.new("Royal purple") or Alder == true
+            if v.Position.X <= api.humanoidrootpart().Position.X + 2.5 and v.Position.X + 2.5 >= api.humanoidrootpart().Position.X and v.Position.Z <= api.humanoidrootpart().Position.Z + 2.5 and v.Position.Z + 2.5 >= api.humanoidrootpart().Position.Z then tc = true end
+        until not v.Parent or tc == true or Alder == true
+        --until not v.Parent or v.BrickColor == BrickColor.new("Forest green") or v.BrickColor == BrickColor.new("Royal purple") or Alder == true
         task.wait(0.1)
         temptable.crosshair = false
         table.remove(temptable.crosshairs, table.find(temptable.crosshairs, v))
